@@ -13,5 +13,5 @@ fetch = "scripts.fetch_data:main"
 stats = "scripts.generate_stats:main"
 build = "scripts.build_site:main"
 
-[tool.uv]
-dev-dependencies = []
+[dependency-groups]
+dev = []
