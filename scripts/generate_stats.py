@@ -98,8 +98,16 @@ def main():
             result = parse_match_result(m, GODSET_NAME)
             is_home = home == GODSET_NAME
             score = None
+            goals_for = None
+            goals_against = None
             if result is not None:
                 score = f"{m['result']['homeScore90']}-{m['result']['awayScore90']}"
+                if is_home:
+                    goals_for = m["result"]["homeScore90"]
+                    goals_against = m["result"]["awayScore90"]
+                else:
+                    goals_for = m["result"]["awayScore90"]
+                    goals_against = m["result"]["homeScore90"]
             godset_matches.append({
                 "date": m["timestamp"],
                 "home_team": home,
@@ -107,6 +115,8 @@ def main():
                 "is_home": is_home,
                 "result": result,
                 "score": score,
+                "goals_for": goals_for,
+                "goals_against": goals_against,
                 "round": m["round"],
             })
 
@@ -128,9 +138,24 @@ def main():
     points_last_5 = sum(3 if m["result"] == "W" else 1 if m["result"] == "D" else 0 for m in last_5)
     points_avg_last_5 = round(points_last_5 / len(last_5), 2) if last_5 else 0.0
 
+    # Goal difference last 5
+    goals_for_last_5 = sum(m["goals_for"] for m in last_5)
+    goals_against_last_5 = sum(m["goals_against"] for m in last_5)
+    goal_difference_last_5 = goals_for_last_5 - goals_against_last_5
+
+    # Home stats (all home matches)
+    home_all = [m for m in completed if m["is_home"]]
+    home_all_points = sum(3 if m["result"] == "W" else 1 if m["result"] == "D" else 0 for m in home_all)
+    home_all_avg = round(home_all_points / len(home_all), 2) if home_all else 0.0
+
     # Home stats (last 5 home matches)
     home_points = sum(3 if m["result"] == "W" else 1 if m["result"] == "D" else 0 for m in home_matches)
     home_avg = round(home_points / len(home_matches), 2) if home_matches else 0.0
+
+    # Away stats (all away matches)
+    away_all = [m for m in completed if not m["is_home"]]
+    away_all_points = sum(3 if m["result"] == "W" else 1 if m["result"] == "D" else 0 for m in away_all)
+    away_all_avg = round(away_all_points / len(away_all), 2) if away_all else 0.0
 
     # Away stats (last 5 away matches)
     away_points = sum(3 if m["result"] == "W" else 1 if m["result"] == "D" else 0 for m in away_matches)
@@ -194,12 +219,19 @@ def main():
             "form_last_5": [m["result"] for m in last_5],
             "points_last_5": points_last_5,
             "points_avg_last_5": points_avg_last_5,
+            "goal_difference_last_5": goal_difference_last_5,
             "home": {
+                "played": len(home_all),
+                "points": home_all_points,
+                "avg": home_all_avg,
                 "played_last_5": len(home_matches),
                 "points_last_5": home_points,
                 "avg_last_5": home_avg,
             },
             "away": {
+                "played": len(away_all),
+                "points": away_all_points,
+                "avg": away_all_avg,
                 "played_last_5": len(away_matches),
                 "points_last_5": away_points,
                 "avg_last_5": away_avg,

@@ -96,17 +96,13 @@
                     <span class="stat-value">{{ godset.points_per_game }}</span>
                     <span class="stat-label">Poengsnitt per kamp</span>
                 </div>
-                <div class="stat-card {% if godset.points_avg_last_5 >= 2.0 %}stat-positive{% elif godset.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.points_avg_last_5 }}</span>
-                    <span class="stat-label">Poengsnitt (siste {{ last_matches|length }})</span>
+                <div class="stat-card {% if godset.home.avg >= 2.0 %}stat-positive{% elif godset.home.avg >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ godset.home.avg }}</span>
+                    <span class="stat-label">Poengsnitt hjemme</span>
                 </div>
-                <div class="stat-card {% if godset.home.avg_last_5 >= 2.0 %}stat-positive{% elif godset.home.avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.home.avg_last_5 }}</span>
-                    <span class="stat-label">Poengsnitt hjemme (siste {{ godset.home.played_last_5 }})</span>
-                </div>
-                <div class="stat-card {% if godset.away.avg_last_5 >= 2.0 %}stat-positive{% elif godset.away.avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.away.avg_last_5 }}</span>
-                    <span class="stat-label">Poengsnitt borte (siste {{ godset.away.played_last_5 }})</span>
+                <div class="stat-card {% if godset.away.avg >= 2.0 %}stat-positive{% elif godset.away.avg >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ godset.away.avg }}</span>
+                    <span class="stat-label">Poengsnitt borte</span>
                 </div>
             </div>
         </section>
@@ -133,6 +129,24 @@
         {# Form #}
         <section class="section">
             <h2 class="section-title">Form siste {{ godset.form_last_5|length }} kamper</h2>
+            <div class="stats-grid">
+                <div class="stat-card {% if godset.points_avg_last_5 >= 2.0 %}stat-positive{% elif godset.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ godset.points_avg_last_5 }}</span>
+                    <span class="stat-label">Poengsnitt (siste {{ last_matches|length }})</span>
+                </div>
+                <div class="stat-card {% if godset.home.avg_last_5 >= 2.0 %}stat-positive{% elif godset.home.avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ godset.home.avg_last_5 }}</span>
+                    <span class="stat-label">Poengsnitt hjemme (siste {{ godset.home.played_last_5 }})</span>
+                </div>
+                <div class="stat-card {% if godset.away.avg_last_5 >= 2.0 %}stat-positive{% elif godset.away.avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ godset.away.avg_last_5 }}</span>
+                    <span class="stat-label">Poengsnitt borte (siste {{ godset.away.played_last_5 }})</span>
+                </div>
+                <div class="stat-card {% if godset.goal_difference_last_5 > 0 %}stat-positive{% elif godset.goal_difference_last_5 == 0 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{% if godset.goal_difference_last_5 > 0 %}+{% endif %}{{ godset.goal_difference_last_5|default(0, true) }}</span>
+                    <span class="stat-label">Målforskjell (siste {{ last_matches|length }})</span>
+                </div>
+            </div>
             <div class="form-row">
                 {% for r in godset.form_last_5 %}
                 <span class="form-badge form-{{ r|lower }}">
