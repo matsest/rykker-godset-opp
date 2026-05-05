@@ -1,0 +1,17 @@
+[project]
+name = "rykkergodsetopp"
+version = "0.1.0"
+description = "Rykker Godset Opp? – Live-oppdatering av Strømsgodsets vei tilbake til Eliteserien."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jinja2>=3.1.0",
+]
+
+[project.scripts]
+fetch = "scripts.fetch_data:main"
+stats = "scripts.generate_stats:main"
+build = "scripts.build_site:main"
+
+[tool.uv]
+dev-dependencies = []

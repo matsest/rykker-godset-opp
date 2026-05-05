@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rykker Godset Opp? – Live tabell og opprykksstatus for Strømsgodset</title>
+    <meta name="description" content="Følg Strømsgodsets vei tilbake til Eliteserien. Live tabell, opprykksstatus, form og kommende kamper i OBOS-ligaen 2026.">
+    <meta name="keywords" content="Strømsgodset, Godset, OBOS-ligaen, opprykk, Eliteserien, tabell, fotball, 2026">
+    <meta name="author" content="Mats Estensen">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godset.mats.codes/">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://godset.mats.codes/">
+    <meta property="og:title" content="Rykker Godset Opp?">
+    <meta property="og:description" content="Følg Strømsgodsets vei tilbake til Eliteserien. Live tabell og opprykksstatus.">
+    <meta property="og:locale" content="nb_NO">
+    <meta property="og:image" content="https://godset.mats.codes/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://godset.mats.codes/">
+    <meta property="twitter:title" content="Rykker Godset Opp?">
+    <meta property="twitter:description" content="Følg Strømsgodsets vei tilbake til Eliteserien. Live tabell og opprykksstatus.">
+    <meta property="twitter:image" content="https://godset.mats.codes/og-image.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SportsTeam",
+        "name": "Strømsgodset",
+        "sport": "Association Football",
+        "memberOf": {
+            "@type": "SportsOrganization",
+            "name": "OBOS-ligaen"
+        }
+    }
+    </script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1 class="site-title">Rykker Godset Opp?</h1>
+            <p class="site-subtitle">Live-oppdatering av Strømsgodsets vei tilbake til Eliteserien</p>
+        </div>
+    </header>
+
+    <main class="container">
+        {# Hero: The Gauge #}
+        <section class="hero">
+            <div class="gauge">
+                <div class="gauge-bar">
+                    <div class="gauge-needle" style="left: {{ godset.promotion.gauge_percent }}%"></div>
+                </div>
+                <div class="gauge-labels">
+                    <span>Nei</span>
+                    <span>Tja</span>
+                    <span>Ja!</span>
+                </div>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ godset.position }}.</span>
+                    <span class="hero-stat-label">Plassering</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ godset.points }}</span>
+                    <span class="hero-stat-label">Poeng</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ godset.played }}</span>
+                    <span class="hero-stat-label">Kamper</span>
+                </div>
+            </div>
+        </section>
+
+        {# Key Numbers #}
+        <section class="section">
+            <h2 class="section-title">Nøkkeltall</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value">{{ godset.won }}-{{ godset.drawn }}-{{ godset.lost }}</span>
+                    <span class="stat-label">Seire – Uavgjort – Tap</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{% if godset.goal_difference > 0 %}+{% endif %}{{ godset.goal_difference|default(0, true) }}</span>
+                    <span class="stat-label">Målforskjell</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ godset.points_per_game }}</span>
+                    <span class="stat-label">Poengsnitt per kamp</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ godset.points_avg_last_5 }}</span>
+                    <span class="stat-label">Poengsnitt (siste {{ last_matches|length }})</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ godset.home.avg_last_5 }}</span>
+                    <span class="stat-label">Poengsnitt hjemme (siste {{ godset.home.played_last_5 }})</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ godset.away.avg_last_5 }}</span>
+                    <span class="stat-label">Poengsnitt borte (siste {{ godset.away.played_last_5 }})</span>
+                </div>
+            </div>
+        </section>
+
+        {# Promotion Status #}
+        <section class="section">
+            <h2 class="section-title">Opprykksstatus</h2>
+            <div class="promo-grid promo-grid-3">
+                <div class="promo-item {% if godset.promotion.points_to_1st <= 0 %}promo-positive{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{{ godset.promotion.points_to_1st }}</span>
+                    <span class="promo-label">Poeng til 1. plass</span>
+                </div>
+                <div class="promo-item {% if godset.promotion.points_to_2nd <= 0 %}promo-positive{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{{ godset.promotion.points_to_2nd }}</span>
+                    <span class="promo-label">Poeng til 2. plass</span>
+                </div>
+                <div class="promo-item {% if godset.promotion.points_to_6th <= 0 %}promo-positive{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{{ godset.promotion.points_to_6th }}</span>
+                    <span class="promo-label">Poeng til 6. plass (kvalik)</span>
+                </div>
+            </div>
+        </section>
+
+        {# Form #}
+        <section class="section">
+            <h2 class="section-title">Form siste {{ godset.form_last_5|length }} kamper</h2>
+            <div class="form-row">
+                {% for r in godset.form_last_5 %}
+                <span class="form-badge form-{{ r|lower }}">
+                    {% if r == 'W' %}V{% elif r == 'D' %}U{% else %}T{% endif %}
+                </span>
+                {% endfor %}
+            </div>
+            <p class="form-points">{{ godset.points_last_5 }} poeng av 15 mulige</p>
+        </section>
+
+        {# Last Matches #}
+        <section class="section">
+            <h2 class="section-title">Siste resultater</h2>
+            <div class="matches-list">
+                {% for m in last_matches %}
+                <div class="match-row match-{{ m.result|lower }}">
+                    <span class="match-date">{{ m.date[:10] }}</span>
+                    <span class="match-teams">{{ m.home_team }} – {{ m.away_team }}</span>
+                    <span class="match-score">{{ m.score }}</span>
+                    <span class="match-result">
+                        {% if m.result == 'W' %}Seier{% elif m.result == 'D' %}Uavgjort{% else %}Tap{% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {# Upcoming Matches #}
+        <section class="section">
+            <h2 class="section-title">Kommende kamper</h2>
+            <div class="matches-list">
+                {% for m in upcoming_matches %}
+                <div class="match-row match-upcoming">
+                    <span class="match-date">{{ m.date[:10] }}</span>
+                    <span class="match-teams">{{ m.home_team }} – {{ m.away_team }}</span>
+                    <span class="match-round">Runde {{ m.round }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {# Table #}
+        <section class="section">
+            <h2 class="section-title">Tabell – OBOS-ligaen 2026</h2>
+            <div class="table-wrapper">
+                <table class="league-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Lag</th>
+                            <th>K</th>
+                            <th>V</th>
+                            <th>U</th>
+                            <th>T</th>
+                            <th>+/-</th>
+                            <th>MF</th>
+                            <th>P</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in table %}
+                        <tr class="{% if t.name == 'Strømsgodset' %}highlight{% endif %} {% if t.position <= 2 %}promotion{% elif t.position <= 6 %}qualification{% elif t.position >= 15 %}relegation{% endif %}">
+                            <td class="pos">{{ t.position }}</td>
+                            <td class="team">{{ t.short_name }}</td>
+                            <td>{{ t.played }}</td>
+                            <td>{{ t.won }}</td>
+                            <td>{{ t.drawn }}</td>
+                            <td>{{ t.lost }}</td>
+                            <td>{{ t.goals_for }}–{{ t.goals_against }}</td>
+                            <td>{{ t.goal_difference }}</td>
+                            <td class="points">{{ t.points }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="legend">
+                <span class="legend-item"><span class="legend-box promotion"></span> Direkte opprykk</span>
+                <span class="legend-item"><span class="legend-box qualification"></span> Kvalifisering</span>
+                <span class="legend-item"><span class="legend-box relegation"></span> Nedrykk</span>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>Sist oppdatert: {{ generated_at[:10] }} {{ generated_at[11:16] }} UTC · Data fra <a href="https://www.nifs.no/" target="_blank" rel="noopener">NIFS</a></p>
+            <p class="footer-note">Ikke offisiell. Laget av <a href="https://github.com/matsest/rykker-godset-opp" target="_blank" rel="noopener">Mats Estensen</a> · <a href="mailto:contact@mxe.no">contact@mxe.no</a></p>
+        </div>
+    </footer>
+</body>
+</html>
