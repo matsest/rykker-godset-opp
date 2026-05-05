@@ -187,8 +187,8 @@
                             <th>V</th>
                             <th>U</th>
                             <th>T</th>
-                            <th>+/-</th>
-                            <th>MF</th>
+                            <th class="hide-mobile">+/-</th>
+                            <th class="hide-mobile">MF</th>
                             <th>P</th>
                         </tr>
                     </thead>
@@ -201,8 +201,8 @@
                             <td>{{ t.won }}</td>
                             <td>{{ t.drawn }}</td>
                             <td>{{ t.lost }}</td>
-                            <td>{{ t.goals_for }}–{{ t.goals_against }}</td>
-                            <td>{{ t.goal_difference }}</td>
+                            <td class="hide-mobile">{{ t.goals_for }}–{{ t.goals_against }}</td>
+                            <td class="hide-mobile">{{ t.goal_difference }}</td>
                             <td class="points">{{ t.points }}</td>
                         </tr>
                         {% endfor %}

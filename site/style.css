@@ -527,4 +527,8 @@ body {
     .match-result {
         display: none;
     }
+
+    .hide-mobile {
+        display: none;
+    }
 }
