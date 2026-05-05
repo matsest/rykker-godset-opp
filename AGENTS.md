@@ -49,6 +49,7 @@ Use the Makefile instead of raw script paths:
 
 - `site/style.css` – Source stylesheet
 - `site/og-image.png` – Open Graph / Twitter card image (1200×630)
+- `site/favicon.svg` – Site favicon (football in Godset blue)
 
 Source for the OG image is `assets/og-image.svg`. To regenerate:
 
