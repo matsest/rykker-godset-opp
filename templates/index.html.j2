@@ -88,7 +88,7 @@
                     <span class="stat-value">{{ godset.won }}-{{ godset.drawn }}-{{ godset.lost }}</span>
                     <span class="stat-label">Seire – Uavgjort – Tap</span>
                 </div>
-                <div class="stat-card {% if godset.goal_difference > 0 %}stat-positive{% elif godset.goal_difference == 0 %}stat-warning{% else %}stat-negative{% endif %}">
+                <div class="stat-card {% if godset.played > 0 %}{% set gd_per_game = godset.goal_difference / godset.played %}{% if gd_per_game >= 0.5 %}stat-positive{% elif godset.goal_difference >= 0 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
                     <span class="stat-value">{% if godset.goal_difference > 0 %}+{% endif %}{{ godset.goal_difference|default(0, true) }}</span>
                     <span class="stat-label">Målforskjell</span>
                 </div>
