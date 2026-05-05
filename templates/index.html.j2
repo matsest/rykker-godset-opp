@@ -195,7 +195,7 @@
                         {% for t in table %}
                         <tr class="{% if t.name == 'Strømsgodset' %}highlight{% endif %} {% if t.position <= 2 %}promotion{% elif t.position <= 6 %}qualification{% elif t.position >= 15 %}relegation{% endif %}">
                             <td class="pos">{{ t.position }}</td>
-                            <td class="team">{{ t.short_name }}</td>
+                            <td class="team">{{ t.display_name }}</td>
                             <td>{{ t.played }}</td>
                             <td>{{ t.won }}</td>
                             <td>{{ t.drawn }}</td>

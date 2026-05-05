@@ -139,13 +139,25 @@ def main():
     # Next 5 upcoming matches
     next_5 = upcoming[:5]
 
+    # Display name overrides for specific teams
+    DISPLAY_NAME_OVERRIDES = {
+        "Strømsgodset": "Strømsgodset",
+        "Kongsvinger": "Kongsvinger",
+        "Haugesund": "Haugesund",
+        "Egersund": "Egersund",
+    }
+
     # Build full table for frontend
     full_table = []
     for row in table_rows:
+        api_name = row["name"]
+        short_name = row.get("shortName", api_name)
+        display_name = DISPLAY_NAME_OVERRIDES.get(api_name, short_name)
         full_table.append({
             "position": row["place"],
-            "name": row["name"],
-            "short_name": row.get("shortName", row["name"]),
+            "name": api_name,
+            "short_name": short_name,
+            "display_name": display_name,
             "played": row["played"],
             "won": row["won"],
             "drawn": row["draw"],
