@@ -1,5 +1,7 @@
 # Rykker Godset Opp?
 
+![image](./assets/og-image.svg)
+
 > Live-oppdatering av Strømsgodsets vei tilbake til Eliteserien.
 
 En enkel, statisk nettside som viser nøkkeltall og tabellstatus for
@@ -77,4 +79,4 @@ time og ved manuell trigging. Siden publiseres til GitHub Pages.
 
 ## Lisens
 
-MIT
+[MIT](./LICENSE)
