@@ -243,6 +243,10 @@ body {
     border-left-color: var(--win);
 }
 
+.promo-warning {
+    border-left-color: var(--draw);
+}
+
 .promo-negative {
     border-left-color: var(--loss);
 }

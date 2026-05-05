@@ -115,17 +115,17 @@
         <section class="section">
             <h2 class="section-title">Opprykksstatus</h2>
             <div class="promo-grid promo-grid-3">
-                <div class="promo-item {% if godset.promotion.points_to_1st <= 0 %}promo-positive{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{{ godset.promotion.points_to_1st }}</span>
-                    <span class="promo-label">Poeng til 1. plass</span>
+                <div class="promo-item {% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st >= 0 %}promo-positive{% elif diff_1st >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st > 0 %}+{% endif %}{{ diff_1st }}</span>
+                    <span class="promo-label">Poeng unna 1. plass</span>
                 </div>
-                <div class="promo-item {% if godset.promotion.points_to_2nd <= 0 %}promo-positive{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{{ godset.promotion.points_to_2nd }}</span>
-                    <span class="promo-label">Poeng til 2. plass</span>
+                <div class="promo-item {% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd >= 0 %}promo-positive{% elif diff_2nd >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd > 0 %}+{% endif %}{{ diff_2nd }}</span>
+                    <span class="promo-label">Poeng unna 2. plass</span>
                 </div>
-                <div class="promo-item {% if godset.promotion.points_to_6th <= 0 %}promo-positive{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{{ godset.promotion.points_to_6th }}</span>
-                    <span class="promo-label">Poeng til 6. plass (kvalik)</span>
+                <div class="promo-item {% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th >= 0 %}promo-positive{% elif diff_6th >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th > 0 %}+{% endif %}{{ diff_6th }}</span>
+                    <span class="promo-label">Poeng unna 6. plass (kvalik)</span>
                 </div>
             </div>
         </section>
