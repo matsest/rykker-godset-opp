@@ -28,6 +28,9 @@ all: fetch stats build
 
 # CI target (used by GitHub Actions)
 ci: all
+	@test -f data/stats.json || (echo "ERROR: data/stats.json not produced – API or stats step failed" && exit 1)
+	@test -s data/stats.json || (echo "ERROR: data/stats.json is empty" && exit 1)
+	@python3 -c "import json; d=json.load(open('data/stats.json')); assert 'godset' in d, 'Missing godset key'; assert 'table' in d, 'Missing table key'" || (echo "ERROR: data/stats.json has invalid structure" && exit 1)
 	@test -f site/index.html || (echo "ERROR: site/index.html not built" && exit 1)
 	@test -f site/style.css || (echo "ERROR: site/style.css not found" && exit 1)
 	@echo "CI check passed – site is ready for deploy"
