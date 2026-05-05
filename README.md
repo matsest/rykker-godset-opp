@@ -64,7 +64,7 @@ Se [AGENTS](./AGENTS.md).
 
 ## Datakilde
 
-[NIFS API](https://api.nifs.no/)
+[NIFS - Norsk Internasjonal Fotballstatistikk](https://www.nifs.no) sitt [API](https://api.nifs.no/).
 
 ## CI/CD
 
