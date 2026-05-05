@@ -60,13 +60,7 @@ make all
 
 ## Hvordan fungerer det?
 
-```
-scripts/fetch_data.py      →  data/raw/*.json
-scripts/generate_stats.py  →  data/stats.json
-scripts/build_site.py      →  site/index.html
-```
-
-Alt er statisk – ingen server, ingen database.
+Se [AGENTS](./AGENTS.md).
 
 ## Datakilde
 
