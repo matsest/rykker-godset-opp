@@ -211,6 +211,18 @@ body {
     color: var(--gray-600);
 }
 
+.stat-positive {
+    border-left: 4px solid var(--win);
+}
+
+.stat-warning {
+    border-left: 4px solid var(--draw);
+}
+
+.stat-negative {
+    border-left: 4px solid var(--loss);
+}
+
 /* Promotion Grid */
 .promo-grid {
     display: grid;

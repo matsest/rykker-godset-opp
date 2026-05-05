@@ -84,27 +84,27 @@
         <section class="section">
             <h2 class="section-title">Nøkkeltall</h2>
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card {% if godset.played > 0 %}{% set win_pct = (godset.won / godset.played * 100) %}{% if win_pct >= 50 %}stat-positive{% elif win_pct >= 30 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
                     <span class="stat-value">{{ godset.won }}-{{ godset.drawn }}-{{ godset.lost }}</span>
                     <span class="stat-label">Seire – Uavgjort – Tap</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card {% if godset.goal_difference > 0 %}stat-positive{% elif godset.goal_difference == 0 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{% if godset.goal_difference > 0 %}+{% endif %}{{ godset.goal_difference|default(0, true) }}</span>
                     <span class="stat-label">Målforskjell</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card {% if godset.points_per_game >= 2.0 %}stat-positive{% elif godset.points_per_game >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.points_per_game }}</span>
                     <span class="stat-label">Poengsnitt per kamp</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card {% if godset.points_avg_last_5 >= 2.0 %}stat-positive{% elif godset.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.points_avg_last_5 }}</span>
                     <span class="stat-label">Poengsnitt (siste {{ last_matches|length }})</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card {% if godset.home.avg_last_5 >= 2.0 %}stat-positive{% elif godset.home.avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.home.avg_last_5 }}</span>
                     <span class="stat-label">Poengsnitt hjemme (siste {{ godset.home.played_last_5 }})</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card {% if godset.away.avg_last_5 >= 2.0 %}stat-positive{% elif godset.away.avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.away.avg_last_5 }}</span>
                     <span class="stat-label">Poengsnitt borte (siste {{ godset.away.played_last_5 }})</span>
                 </div>
