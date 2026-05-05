@@ -161,6 +161,22 @@ body {
     border-bottom: 2px solid var(--gray-200);
 }
 
+.section-link {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.section-link a {
+    color: var(--godset-blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.section-link a:hover {
+    text-decoration: underline;
+}
+
 /* Stats Grid */
 .stats-grid {
     display: grid;
