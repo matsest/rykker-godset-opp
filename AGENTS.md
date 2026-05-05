@@ -60,9 +60,19 @@ Requires ImageMagick (`convert`).
 
 ## CI / GitHub Actions
 
-Workflow `.github/workflows/update-site.yml` runs every hour and on manual dispatch. It runs `make ci` (not individual scripts) and deploys `site/` to GitHub Pages.
+Workflow `.github/workflows/update-site.yml` runs daily at 06:00 UTC and on manual dispatch. It runs `make ci` (not individual scripts) and deploys `site/` to GitHub Pages.
 
 If you change the build pipeline, update both the Makefile and the workflow.
+
+## Generated Files
+
+`.gitignore` is configured to exclude build artifacts. Never commit:
+
+- `data/raw/*.json`
+- `data/stats.json`
+- `site/index.html`
+
+Static files in `site/` (style.css, og-image.png) are not generated and must be committed.
 
 ## Language Conventions
 

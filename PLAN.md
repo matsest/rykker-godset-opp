@@ -35,7 +35,7 @@ Alt er statisk. Ingen server, ingen database. Kun filer.
 | **Python 3.12+** | Scriptspråk |
 | **Jinja2** | HTML-template engine |
 | **GitHub Actions** | CI/CD: fetch → stats → build → deploy |
-| **GitHub Pages / Cloudflare Pages** | Hosting |
+| **GitHub Pages** | Hosting |
 
 ---
 
@@ -56,15 +56,16 @@ Alt er statisk. Ingen server, ingen database. Kun filer.
 - [x] Plassering i tabellen
 - [x] Poeng, mål scoret/mottatt, målforskjell
 - [x] Kamper spilt, seire / uavgjort / tap
+- [x] Gauge: Nei / Tja / Ja!
 - [x] Form siste 5 kamper
-- [x] Poengsnitt siste 5 kamper
-- [x] Poengsnitt hjemme / borte siste 5 kamper
+- [x] Poengsnitt (siste 5)
+- [x] Poengsnitt hjemme (siste 5 hjemmekamper)
+- [x] Poengsnitt borte (siste 5 bortekamper)
 - [x] Avstand til 1. plass (direkte opprykk)
-- [x] Avstand til 3. plass (kvalifiseringsgrense)
-- [x] Avstand til 15. plass (nedrykk)
-- [x] Status: **JA** / **KVALIFISERING** / **NEI**
-- [x] Siste 5 resultater
-- [x] Neste 3 kamper
+- [x] Avstand til 2. plass (direkte opprykk)
+- [x] Avstand til 6. plass (kvalifiseringsgrense)
+- [x] Siste 5 resultater (med hjemme–borte-format)
+- [x] Neste 5 kamper (med hjemme–borte-format)
 
 ## Nøkkeltall (fremtidig)
 
@@ -92,10 +93,15 @@ Alt er statisk. Ingen server, ingen database. Kun filer.
 ```
 rykkergodsetopp/
 ├── .github/workflows/update-site.yml
+├── .gitignore
 ├── .mise.toml
+├── LICENSE
+├── Makefile
 ├── PLAN.md
 ├── README.md
 ├── pyproject.toml
+├── assets/
+│   └── og-image.svg
 ├── scripts/
 │   ├── fetch_data.py
 │   ├── generate_stats.py
@@ -104,29 +110,29 @@ rykkergodsetopp/
 │   ├── raw/
 │   │   ├── table.json
 │   │   ├── matches.json
-│   │   └── teams.json
+│   │   ├── teams.json
+│   │   └── metadata.json
 │   └── stats.json
 ├── templates/
 │   └── index.html.j2
 └── site/
     ├── index.html
-    └── style.css
+    ├── style.css
+    └── og-image.png
 ```
 
 ---
 
 ## CI/CD (GitHub Actions)
 
-Trigger: `workflow_dispatch` (manuell) + `schedule` (timevis).
+Trigger: `workflow_dispatch` (manuell) + `schedule` (daglig kl. 06:00 UTC).
 
 Steg:
 1. Checkout repo
 2. Setup Python + uv
 3. `uv sync`
-4. `python scripts/fetch_data.py`
-5. `python scripts/generate_stats.py`
-6. `python scripts/build_site.py`
-7. Deploy `site/` til GitHub Pages
+4. `make ci`
+5. Deploy `site/` til GitHub Pages
 
 ---
 
@@ -134,9 +140,10 @@ Steg:
 
 | Fase | Status |
 |------|--------|
-| MVP – backend scripts | 🚧 Under arbeid |
-| MVP – frontend/design | 🚧 Under arbeid |
-| CI/CD – GitHub Actions | ⏳ Planlagt |
+| MVP – backend scripts | ✅ Ferdig |
+| MVP – frontend/design | ✅ Ferdig |
+| SEO + metadata | ✅ Ferdig |
+| CI/CD – GitHub Actions | ✅ Ferdig |
 | Utvidet data (xG, sammenligning) | ⏳ Fremtidig |
 
 ---
