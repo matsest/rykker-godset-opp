@@ -782,7 +782,7 @@ body {
     font-size: 0.75rem;
 }
 
-.share-bar {
+.footer-actions {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -790,13 +790,13 @@ body {
     margin: 0.75rem 0;
 }
 
-.share-label {
+.footer-actions-label {
     font-size: 0.8rem;
     opacity: 0.85;
     margin-right: 0.25rem;
 }
 
-.share-btn {
+.action-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -812,8 +812,8 @@ body {
     padding: 0;
 }
 
-.share-btn:hover,
-.share-btn:focus {
+.action-btn:hover,
+.action-btn:focus {
     background: rgba(255,255,255,0.2);
     transform: scale(1.1);
 }
