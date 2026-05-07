@@ -93,6 +93,15 @@
                         </span>
                     </span>
                 </div>
+                <div class="stat-card {% if godset.played > 0 %}{% set win_pct = (godset.won / godset.played * 100) %}{% if win_pct >= 50 %}stat-positive{% elif win_pct >= 30 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
+                    <span class="stat-value">{% if godset.played > 0 %}{{ (godset.won / godset.played * 100)|round|int }}%{% else %}0%{% endif %}</span>
+                    <span class="stat-label">
+                        Seiersprosent
+                        <span class="tooltip-trigger" tabindex="0">&#9432;
+                            <span class="tooltip-text">Grønn: ≥50% seier, Gul: ≥30% seier, Rød: &lt;30% seier</span>
+                        </span>
+                    </span>
+                </div>
                 <div class="stat-card {% if godset.played > 0 %}{% set gd_per_game = godset.goal_difference / godset.played %}{% if gd_per_game >= 0.5 %}stat-positive{% elif godset.goal_difference >= 0 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
                     <span class="stat-value">{% if godset.goal_difference > 0 %}+{% endif %}{{ godset.goal_difference|default(0, true) }}</span>
                     <span class="stat-label">
@@ -165,6 +174,10 @@
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva er målprosent?">&#9432;
                             <span class="tooltip-text">Andel av skudd på mål som ender i mål</span>
                         </span>
+                        {% elif key == 'points_last_5' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er form?">&#9432;
+                            <span class="tooltip-text">Poeng fra de siste 5 kampene (maks 15 poeng)</span>
+                        </span>
                         {% endif %}
                     </span>
                     <span class="stat-rank">
@@ -183,6 +196,10 @@
         <section class="section">
             <h2 class="section-title">Form siste {{ godset.form_last_5|length }} kamper</h2>
             <div class="stats-grid">
+                <div class="stat-card {% if godset.won_last_5 >= 3 %}stat-positive{% elif godset.won_last_5 >= 1 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ godset.won_last_5 }}-{{ godset.drawn_last_5 }}-{{ godset.lost_last_5 }}</span>
+                    <span class="stat-label">Seire – Uavgjort – Tap</span>
+                </div>
                 <div class="stat-card {% if godset.points_avg_last_5 >= 2.0 %}stat-positive{% elif godset.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.points_avg_last_5 }}</span>
                     <span class="stat-label">Poengsnitt (siste {{ last_matches|length }})</span>

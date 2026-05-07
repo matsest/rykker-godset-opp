@@ -69,7 +69,43 @@ def load_match_stats() -> dict:
     return {}
 
 
-def aggregate_team_stats(match_stats: dict, table_rows: list) -> list[dict]:
+def calculate_last_5_points(matches_data: list) -> dict[str, int]:
+    """Calculate points from last 5 completed matches for every team."""
+    team_matches: dict[str, list[dict]] = {}
+    for m in matches_data:
+        result = m.get("result", {})
+        home_score = result.get("homeScore90")
+        away_score = result.get("awayScore90")
+        if home_score is None or away_score is None:
+            continue
+
+        home = m["homeTeam"]["name"]
+        away = m["awayTeam"]["name"]
+        timestamp = m["timestamp"]
+
+        for team, is_home in [(home, True), (away, False)]:
+            if team not in team_matches:
+                team_matches[team] = []
+
+            if home_score == away_score:
+                points = 1
+            elif is_home:
+                points = 3 if home_score > away_score else 0
+            else:
+                points = 3 if away_score > home_score else 0
+
+            team_matches[team].append({"timestamp": timestamp, "points": points})
+
+    last_5_points = {}
+    for team, matches in team_matches.items():
+        matches.sort(key=lambda x: x["timestamp"])
+        last_5 = matches[-5:] if len(matches) >= 5 else matches
+        last_5_points[team] = sum(m["points"] for m in last_5)
+
+    return last_5_points
+
+
+def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list) -> list[dict]:
     """Aggregate match-level stats per team and combine with table data."""
     # Initialize with table data
     teams = {}
@@ -89,6 +125,12 @@ def aggregate_team_stats(match_stats: dict, table_rows: list) -> list[dict]:
             "possession_sum": 0,
             "possession_matches": 0,
         }
+
+    # Points from last 5 matches
+    last_5_points = calculate_last_5_points(matches_data)
+    for name, points in last_5_points.items():
+        if name in teams:
+            teams[name]["points_last_5"] = points
 
     # Aggregate from match stats cache
     for match_id, data in match_stats.items():
@@ -130,6 +172,7 @@ def aggregate_team_stats(match_stats: dict, table_rows: list) -> list[dict]:
             "chances": t["chances"],
             "possession": possession,
             "conversion_rate": conversion_rate,
+            "points_last_5": t.get("points_last_5", 0),
         })
 
     return result
@@ -149,6 +192,7 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
         ("chances", False),
         ("possession", False),
         ("conversion_rate", False),
+        ("points_last_5", False),
     ]
 
     for field, ascending in categories:
@@ -271,6 +315,11 @@ def main():
     goals_against_last_5 = sum(m["goals_against"] for m in last_5)
     goal_difference_last_5 = goals_for_last_5 - goals_against_last_5
 
+    # W-D-L last 5
+    won_last_5 = sum(1 for m in last_5 if m["result"] == "W")
+    drawn_last_5 = sum(1 for m in last_5 if m["result"] == "D")
+    lost_last_5 = sum(1 for m in last_5 if m["result"] == "L")
+
     # Home stats (all home matches)
     home_all = [m for m in completed if m["is_home"]]
     home_all_points = sum(3 if m["result"] == "W" else 1 if m["result"] == "D" else 0 for m in home_all)
@@ -323,7 +372,7 @@ def main():
         })
 
     # Aggregate league-wide stats from match stats cache
-    team_stats = aggregate_team_stats(match_stats, table_rows)
+    team_stats = aggregate_team_stats(match_stats, table_rows, matches_data)
     rankings = calculate_rankings(team_stats)
 
     # Build Godset rank info
@@ -336,6 +385,7 @@ def main():
         "chances": {"label": "Sjanser skapt", "format": "{value}"},
         "possession": {"label": "Ballbesittelse", "format": "{value}%"},
         "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
+        "points_last_5": {"label": "Form (siste 5)", "format": "{value}"},
     }
 
     godset_ranks = {}
@@ -383,6 +433,9 @@ def main():
             "form_last_5": [m["result"] for m in last_5],
             "points_last_5": points_last_5,
             "points_avg_last_5": points_avg_last_5,
+            "won_last_5": won_last_5,
+            "drawn_last_5": drawn_last_5,
+            "lost_last_5": lost_last_5,
             "goal_difference_last_5": goal_difference_last_5,
             "home": {
                 "played": len(home_all),
