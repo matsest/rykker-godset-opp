@@ -16,7 +16,7 @@ All Python scripts must be run via `uv run` (mise adds `.venv/bin` to PATH).
 Three-step static-site generator. Order matters.
 
 ```
-scripts/fetch_data.py      →  data/raw/*.json
+scripts/fetch_data.py      →  data/raw/*.json  (inkl. match_stats.json)
 scripts/generate_stats.py  →  data/stats.json
 scripts/build_site.py      →  site/index.html
 ```
@@ -52,6 +52,9 @@ Only run `make ci` when you want the full pipeline plus file-existence checks.
 - **Template engine:** Jinja2 (`templates/index.html.j2`).
 - **Output:** Single-file static site (`site/index.html` + `site/style.css`). No JS bundler, no framework.
 - **Promotion rules (2026):** 1-2 direct promotion, 3-6 qualification, 14 relegation playoff, 15-16 direct relegation. Reflected in CSS classes and stats logic.
+- **Match stats caching:** `fetch_data.py` incrementally fetches per-match statistics (`matches/{id}/`) and caches them in `data/raw/match_stats.json` to minimize API calls.
+- **League-wide aggregation:** `generate_stats.py` aggregates per-team stats (shots, chances, possession, conversion rate) across all matches and calculates league rankings for each category, exposed via the `Ligastatistikk` section.
+- **Anchor links:** All page sections have `id` attributes and clickable headings for direct URL hash navigation.
 
 ## Static Assets
 
@@ -73,6 +76,8 @@ Requires ImageMagick (`convert`).
 
 Workflow `.github/workflows/update-site.yml` runs daily at 06:00 UTC and on manual dispatch. It runs `make ci` (not individual scripts) and deploys `site/` to GitHub Pages.
 
+The workflow caches `data/raw/` between runs (keyed by run ID with `nifs-data-` prefix) so that `fetch_data.py` reuses previously downloaded match stats and only fetches new ones.
+
 If you change the build pipeline, update both the Makefile and the workflow.
 
 ## Generated Files
@@ -83,7 +88,7 @@ If you change the build pipeline, update both the Makefile and the workflow.
 - `data/stats.json`
 - `site/index.html`
 
-Static files in `site/` (style.css, og-image.png) are not generated and must be committed.
+Static files in `site/` (style.css, og-image.png, favicon.svg) are not generated and must be committed.
 
 ## Language Conventions
 
@@ -93,4 +98,4 @@ Static files in `site/` (style.css, og-image.png) are not generated and must be 
 
 ## Testing / Verification
 
-There are no unit tests, linters, or formatters configured yet. The only verification is `make ci`, which checks file existence. Run `make all && make serve` to preview locally before committing.
+There are no unit tests, linters, or formatters configured yet. The only verification is `make ci`, which checks file existence and validates that `data/stats.json` contains the expected structure (`godset` and `table` keys). Run `make all && make serve` to preview locally before committing.

@@ -17,7 +17,7 @@ mot opprykk fra OBOS-ligaen 2026.
 ## Arkitektur
 
 ```
-scripts/fetch_data.py      →  data/raw/*.json
+scripts/fetch_data.py      →  data/raw/*.json  (inkl. match_stats.json)
 scripts/generate_stats.py  →  data/stats.json
 scripts/build_site.py      →  site/index.html + site/style.css
 ```
@@ -48,6 +48,7 @@ Alt er statisk. Ingen server, ingen database. Kun filer.
 | `stages/700912/table/` | Komplett tabell |
 | `stages/700912/matches/` | Alle kamper (resultater + kommende) |
 | `stages/700912/teams/` | Lagliste |
+| `matches/{id}/` | Kampstatistikk (skudd, sjanser, ballbesittelse) |
 
 ---
 
@@ -59,21 +60,20 @@ Alt er statisk. Ingen server, ingen database. Kun filer.
 - [x] Gauge: Nei / Tja / Ja!
 - [x] Form siste 5 kamper
 - [x] Poengsnitt (siste 5)
-- [x] Poengsnitt hjemme (siste 5 hjemmekamper)
-- [x] Poengsnitt borte (siste 5 bortekamper)
+- [x] Seiersprosent
 - [x] Avstand til 1. plass (direkte opprykk)
 - [x] Avstand til 2. plass (direkte opprykk)
 - [x] Avstand til 6. plass (kvalifiseringsgrense)
 - [x] Siste 5 resultater (med hjemme–borte-format)
 - [x] Neste 5 kamper (med hjemme–borte-format)
+- [x] Mål vs skudd på mål (konverteringsrate)
+- [x] Ligastatistikk – sammenligning med resten av ligaen (skudd, sjanser, ballbesittelse, målprosent, form)
+- [x] Ligaranking per statistikk med indikator for over-/underprestasjon vs tabellplassering
 
 ## Nøkkeltall (fremtidig)
 
-- [ ] Mål vs skudd på mål (konverteringsrate)
-- [ ] xG og xGA
-- [ ] Sammenligning med lag på 1. og 2. plass
-- [ ] Sammenligning med fjorårets topp 2
-- [ ] Toppscorer
+- [ ] Sammenligning med topp 2 siste 5 år
+- [ ] Toppscorer / målscorere
 
 ---
 
@@ -111,6 +111,7 @@ rykkergodsetopp/
 │   │   ├── table.json
 │   │   ├── matches.json
 │   │   ├── teams.json
+│   │   ├── match_stats.json
 │   │   └── metadata.json
 │   └── stats.json
 ├── templates/
@@ -118,7 +119,8 @@ rykkergodsetopp/
 └── site/
     ├── index.html
     ├── style.css
-    └── og-image.png
+    ├── og-image.png
+    └── favicon.svg
 ```
 
 ---
@@ -131,8 +133,9 @@ Steg:
 1. Checkout repo
 2. Setup Python + uv
 3. `uv sync`
-4. `make ci`
-5. Deploy `site/` til GitHub Pages
+4. Cache `data/raw/` fra forrige kjøring (gjenbruker match_stats)
+5. `make ci`
+6. Deploy `site/` til GitHub Pages
 
 ---
 
@@ -144,7 +147,7 @@ Steg:
 | MVP – frontend/design | ✅ Ferdig |
 | SEO + metadata | ✅ Ferdig |
 | CI/CD – GitHub Actions | ✅ Ferdig |
-| Utvidet data (xG, sammenligning) | ⏳ Fremtidig |
+| Utvidet data (ligastatistikk, kampdata) | ✅ Ferdig |
 
 ---
 
@@ -154,10 +157,3 @@ Steg:
 - **Opprykkskvalifisering:** 3.–6. plass
 - **Nedrykkskvalifisering:** 14. plass
 - **Direkte nedrykk:** 15.–16. plass
-
----
-
-## Oppdateringer
-
-- **2026-05-05:** Prosjekt opprettet. NIFS API identifisert som datakilde.
-  Stage ID 700912 = OBOS-ligaen 2026.
