@@ -4,13 +4,17 @@
 
 > Live-oppdatering av Strømsgodsets vei tilbake til Eliteserien.
 
+**Se siden live: https://godset.mats.codes**
+
 En enkel, statisk nettside som viser nøkkeltall og tabellstatus for
 Strømsgodset i OBOS-ligaen 2026. Data hentes fra NIFS API og oppdateres
 automatisk hver dag.
 
-Denne siden er ikke offisiell og har ingen tilknytning til Strømsgodset, OBOS-ligaen eller andre. Kun laget med (blå) kjærlighet for laget mitt.
+Denne siden er ikke offisiell og har ingen tilknytning til Strømsgodset, OBOS-ligaen eller andre. Kun laget med ekte kjærlighet for laget mitt :blue_heart:
 
-## Kom i gang
+## Utvikling
+
+### Kom i gang
 
 Krever [mise](https://mise.jdx.dev/) og [uv](https://docs.astral.sh/uv/):
 
@@ -19,7 +23,7 @@ mise install      # Installerer Python og uv
 uv sync           # Installerer avhengigheter
 ```
 
-## Makefile-kommandoer
+### Makefile-kommandoer
 
 Prosjektet bruker en `Makefile` for alle vanlige oppgaver:
 
