@@ -88,7 +88,7 @@ If you change the build pipeline, update both the Makefile and the workflow.
 - `data/stats.json`
 - `site/index.html`
 
-Static files in `site/` (style.css, og-image.png, favicon.svg) are not generated and must be committed.
+Static files in `site/` (style.css, og-image.png, favicon.svg, sitemap.xml) are not generated and must be committed.
 
 ## Language Conventions
 
