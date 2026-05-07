@@ -162,6 +162,13 @@ body {
     border-bottom: 2px solid var(--gray-200);
 }
 
+.section-intro {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--gray-900);
+    margin-bottom: 1rem;
+}
+
 .section-link {
     margin-top: 1rem;
     text-align: center;
