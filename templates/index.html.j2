@@ -433,6 +433,28 @@
                 }
             });
         }
+
+        // Tooltip tap-to-toggle / tap-outside-to-close
+        document.querySelectorAll('.tooltip-trigger').forEach(function(trigger) {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var tooltip = trigger.querySelector('.tooltip-text');
+                if (!tooltip) return;
+                var isVisible = tooltip.classList.contains('is-visible');
+                document.querySelectorAll('.tooltip-text.is-visible').forEach(function(t) {
+                    t.classList.remove('is-visible');
+                });
+                if (!isVisible) {
+                    tooltip.classList.add('is-visible');
+                }
+            });
+        });
+
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.tooltip-text.is-visible').forEach(function(t) {
+                t.classList.remove('is-visible');
+            });
+        });
     })();
     </script>
 </body>
