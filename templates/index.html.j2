@@ -23,22 +23,58 @@
     <meta property="og:image:height" content="630">
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://godset.mats.codes/">
-    <meta property="twitter:title" content="Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.">
-    <meta property="twitter:description" content="Oppdatert nøkkeltall, opprykksstatus og tabell for Strømsgodset i 2026.">
-    <meta property="twitter:image" content="https://godset.mats.codes/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@matsest">
+    <meta name="twitter:creator" content="@matsest">
+    <meta name="twitter:url" content="https://godset.mats.codes/">
+    <meta name="twitter:title" content="Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.">
+    <meta name="twitter:description" content="Oppdatert nøkkeltall, opprykksstatus og tabell for Strømsgodset i 2026.">
+    <meta name="twitter:image" content="https://godset.mats.codes/og-image.png">
 
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Rykker Godset Opp?",
+        "url": "https://godset.mats.codes/",
+        "description": "Følg Strømsgodsets vei tilbake til Eliteserien. Oppdatert statistikk, opprykksstatus, tabell, form og kommende kamper i OBOS-ligaen 2026.",
+        "inLanguage": "nb",
+        "publisher": {
+            "@type": "Person",
+            "name": "Mats Estensen",
+            "url": "https://github.com/matsest"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
         "@type": "SportsTeam",
         "name": "Strømsgodset",
+        "alternateName": "Godset",
         "sport": "Association Football",
+        "foundingDate": "1907-02-10",
+        "location": {
+            "@type": "Place",
+            "name": "Drammen",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Drammen",
+                "addressCountry": "NO"
+            }
+        },
         "memberOf": {
             "@type": "SportsOrganization",
-            "name": "OBOS-ligaen"
+            "name": "OBOS-ligaen",
+            "alternateName": "1. divisjon",
+            "sport": "Association Football"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "{{ godset.points_per_game }}",
+            "bestRating": "3",
+            "worstRating": "0"
         }
     }
     </script>
