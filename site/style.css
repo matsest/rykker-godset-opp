@@ -187,6 +187,12 @@ body {
     margin: 0 auto 1.5rem;
 }
 
+@media (min-width: 640px) {
+    .gauge {
+        max-width: 600px;
+    }
+}
+
 .gauge-bar {
     position: relative;
     height: 36px;
