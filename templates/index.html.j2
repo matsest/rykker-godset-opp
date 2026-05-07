@@ -117,8 +117,8 @@
         </section>
 
         {# Key Numbers #}
-        <section class="section">
-            <h2 class="section-title">Nøkkeltall</h2>
+        <section class="section" id="nokkeltall">
+            <h2 class="section-title"><a href="#nokkeltall">Nøkkeltall</a></h2>
             <div class="stats-grid">
                 <div class="stat-card {% if godset.played > 0 %}{% set win_pct = (godset.won / godset.played * 100) %}{% if win_pct >= 50 %}stat-positive{% elif win_pct >= 30 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
                     <span class="stat-value">{{ godset.won }}-{{ godset.drawn }}-{{ godset.lost }}</span>
@@ -178,8 +178,8 @@
         </section>
 
         {# Promotion Status #}
-        <section class="section">
-            <h2 class="section-title">Opprykksstatus</h2>
+        <section class="section" id="opprykksstatus">
+            <h2 class="section-title"><a href="#opprykksstatus">Opprykksstatus</a></h2>
             <div class="promo-grid promo-grid-3">
                 <div class="promo-item {% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st >= 0 %}promo-positive{% elif diff_1st >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
                     <span class="promo-value">{% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st > 0 %}+{% endif %}{{ diff_1st }}</span>
@@ -198,8 +198,8 @@
 
         {# League Stats #}
         {% if godset.ranks %}
-        <section class="section">
-            <h2 class="section-title">Ligastatistikk</h2>
+        <section class="section" id="ligastatistikk">
+            <h2 class="section-title"><a href="#ligastatistikk">Ligastatistikk</a></h2>
             <div class="stats-grid">
                 {% for key, rank in godset.ranks.items() %}
                 <div class="stat-card {% if rank.vs_table == 'better' %}stat-positive{% elif rank.vs_table == 'worse' %}stat-negative{% else %}stat-warning{% endif %}">
@@ -229,8 +229,8 @@
         {% endif %}
 
         {# Form #}
-        <section class="section">
-            <h2 class="section-title">Form siste {{ godset.form_last_5|length }} kamper</h2>
+        <section class="section" id="form">
+            <h2 class="section-title"><a href="#form">Form siste {{ godset.form_last_5|length }} kamper</a></h2>
             <div class="stats-grid">
                 <div class="stat-card {% if godset.won_last_5 >= 3 %}stat-positive{% elif godset.won_last_5 >= 1 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.won_last_5 }}-{{ godset.drawn_last_5 }}-{{ godset.lost_last_5 }}</span>
@@ -256,8 +256,8 @@
         </section>
 
         {# Last Matches #}
-        <section class="section">
-            <h2 class="section-title">Siste resultater</h2>
+        <section class="section" id="siste-resultater">
+            <h2 class="section-title"><a href="#siste-resultater">Siste resultater</a></h2>
             <div class="matches-list">
                 {% for m in last_matches %}
                 <div class="match-row match-{{ m.result|lower }}">
@@ -274,8 +274,8 @@
         </section>
 
         {# Upcoming Matches #}
-        <section class="section">
-            <h2 class="section-title">Kommende kamper</h2>
+        <section class="section" id="kommende-kamper">
+            <h2 class="section-title"><a href="#kommende-kamper">Kommende kamper</a></h2>
             <div class="matches-list">
                 {% for m in upcoming_matches %}
                 <div class="match-row match-upcoming">
@@ -289,8 +289,8 @@
         </section>
 
         {# Table #}
-        <section class="section">
-            <h2 class="section-title">Tabell – OBOS-ligaen 2026</h2>
+        <section class="section" id="tabell">
+            <h2 class="section-title"><a href="#tabell">Tabell – OBOS-ligaen 2026</a></h2>
             <div class="table-wrapper">
                 <table class="league-table">
                     <thead>
