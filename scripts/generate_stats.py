@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 RAW_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "raw")
 STATS_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stats.json")
+MATCH_STATS_PATH = os.path.join(RAW_DIR, "match_stats.json")
 
 GODSET_NAME = "Strømsgodset"
 PROMOTION_SPOTS = 2
@@ -54,10 +55,137 @@ def parse_match_result(match: dict, team_name: str) -> str | None:
         return "W" if away_score > home_score else "L"
 
 
+def load_raw(name: str):
+    path = os.path.join(RAW_DIR, f"{name}.json")
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_match_stats() -> dict:
+    """Load cached match statistics if available."""
+    if os.path.exists(MATCH_STATS_PATH):
+        with open(MATCH_STATS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def aggregate_team_stats(match_stats: dict, table_rows: list) -> list[dict]:
+    """Aggregate match-level stats per team and combine with table data."""
+    # Initialize with table data
+    teams = {}
+    for row in table_rows:
+        name = row["name"]
+        teams[name] = {
+            "name": name,
+            "short_name": row.get("shortName", name),
+            "position": row["place"],
+            "played": row["played"],
+            "goals_scored": row["goalsScored"],
+            "goals_conceded": row["goalsConceded"],
+            "goal_difference": row["goalDifference"],
+            "total_shots": 0,
+            "shots_on_goal": 0,
+            "chances": 0,
+            "possession_sum": 0,
+            "possession_matches": 0,
+        }
+
+    # Aggregate from match stats cache
+    for match_id, data in match_stats.items():
+        home_team = data.get("home_team")
+        away_team = data.get("away_team")
+        home_stats = data.get("home_stats", {})
+        away_stats = data.get("away_stats", {})
+
+        for team_name, stats in [(home_team, home_stats), (away_team, away_stats)]:
+            if team_name not in teams:
+                continue
+            t = teams[team_name]
+            if "totalShots" in stats and stats["totalShots"] is not None:
+                t["total_shots"] += stats["totalShots"]
+            if "shotsOnGoal" in stats and stats["shotsOnGoal"] is not None:
+                t["shots_on_goal"] += stats["shotsOnGoal"]
+            if "chances" in stats and stats["chances"] is not None:
+                t["chances"] += stats["chances"]
+            if "possession" in stats and stats["possession"] is not None:
+                t["possession_sum"] += stats["possession"]
+                t["possession_matches"] += 1
+
+    # Calculate derived stats and build final list
+    result = []
+    for name, t in teams.items():
+        possession = round(t["possession_sum"] / t["possession_matches"], 1) if t["possession_matches"] > 0 else 0.0
+        conversion_rate = round(t["goals_scored"] / t["shots_on_goal"] * 100, 1) if t["shots_on_goal"] > 0 else 0.0
+
+        result.append({
+            "name": t["name"],
+            "short_name": t["short_name"],
+            "position": t["position"],
+            "played": t["played"],
+            "goals_scored": t["goals_scored"],
+            "goals_conceded": t["goals_conceded"],
+            "goal_difference": t["goal_difference"],
+            "total_shots": t["total_shots"],
+            "shots_on_goal": t["shots_on_goal"],
+            "chances": t["chances"],
+            "possession": possession,
+            "conversion_rate": conversion_rate,
+        })
+
+    return result
+
+
+def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
+    """Calculate league rankings for each stat category."""
+    rankings = {}
+
+    # (field, ascending)
+    categories = [
+        ("goals_scored", False),
+        ("goals_conceded", True),
+        ("goal_difference", False),
+        ("total_shots", False),
+        ("shots_on_goal", False),
+        ("chances", False),
+        ("possession", False),
+        ("conversion_rate", False),
+    ]
+
+    for field, ascending in categories:
+        # Filter out teams with invalid values; allow negatives for goal_difference
+        if field == "goal_difference":
+            valid = [(t["name"], t[field]) for t in team_stats if t[field] is not None]
+        else:
+            valid = [(t["name"], t[field]) for t in team_stats if t[field] is not None and t[field] >= 0]
+        sorted_teams = sorted(valid, key=lambda x: x[1], reverse=not ascending)
+        rankings[field] = sorted_teams
+
+    return rankings
+
+
+def get_team_rank(team_name: str, rankings: dict, field: str) -> tuple | None:
+    """Return (value, rank, total) for a team in a given ranking."""
+    ranked = rankings.get(field, [])
+    for i, (name, value) in enumerate(ranked):
+        if name == team_name:
+            return (value, i + 1, len(ranked))
+    return None
+
+
+def compare_to_table(rank: int, table_position: int) -> str:
+    """Return whether a stat rank is better, worse, or equal vs table position."""
+    if rank < table_position:
+        return "better"
+    elif rank > table_position:
+        return "worse"
+    return "equal"
+
+
 def main():
     table_data = load_raw("table")
     matches_data = load_raw("matches")
     teams_data = load_raw("teams")
+    match_stats = load_match_stats()
 
     # Extract table rows
     table_rows = table_data.get("teams", [])
@@ -194,6 +322,42 @@ def main():
             "form": row.get("lastSixMatches", "").split(",") if row.get("lastSixMatches") else [],
         })
 
+    # Aggregate league-wide stats from match stats cache
+    team_stats = aggregate_team_stats(match_stats, table_rows)
+    rankings = calculate_rankings(team_stats)
+
+    # Build Godset rank info
+    rank_fields = {
+        "goals_scored": {"label": "Mål scoret", "format": "{value}"},
+        "goals_conceded": {"label": "Mål sluppet inn", "format": "{value}"},
+        "goal_difference": {"label": "Målforskjell", "format": "{value}"},
+        "total_shots": {"label": "Skudd totalt", "format": "{value}"},
+        "shots_on_goal": {"label": "Skudd på mål", "format": "{value}"},
+        "chances": {"label": "Sjanser skapt", "format": "{value}"},
+        "possession": {"label": "Ballbesittelse", "format": "{value}%"},
+        "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
+    }
+
+    godset_ranks = {}
+    for field, meta in rank_fields.items():
+        rank_info = get_team_rank(GODSET_NAME, rankings, field)
+        if rank_info:
+            value, rank, total = rank_info
+            comparison = compare_to_table(rank, position)
+            if field == "goal_difference":
+                display_value = f"{'+' if value > 0 else ''}{value}"
+            else:
+                display_value = meta["format"].format(value=value)
+            godset_ranks[field] = {
+                "label": meta["label"],
+                "value": value,
+                "rank": rank,
+                "total": total,
+                "display_value": display_value,
+                "display_rank": f"{rank}. av {total}",
+                "vs_table": comparison,
+            }
+
     stats = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "season": {
@@ -246,10 +410,12 @@ def main():
                 "points_to_2nd": points_to_2nd,
                 "points_to_6th": points_to_6th,
             },
+            "ranks": godset_ranks,
         },
         "last_matches": last_5,
         "upcoming_matches": next_5,
         "table": full_table,
+        "team_stats": team_stats,
     }
 
     os.makedirs(os.path.dirname(STATS_PATH), exist_ok=True)
@@ -259,11 +425,12 @@ def main():
     print(f"Stats saved to {STATS_PATH}", file=sys.stderr)
     print(f"Godset: {position}. plass, {points} poeng – {status_text}", file=sys.stderr)
 
-
-def load_raw(name: str):
-    path = os.path.join(RAW_DIR, f"{name}.json")
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    # Print rank summary
+    if godset_ranks:
+        print(f"\nLigarankinger:", file=sys.stderr)
+        for field, info in godset_ranks.items():
+            indicator = "↑" if info["vs_table"] == "better" else "↓" if info["vs_table"] == "worse" else "→"
+            print(f"  {info['label']}: {info['display_value']} ({info['display_rank']}) {indicator}", file=sys.stderr)
 
 
 if __name__ == "__main__":
