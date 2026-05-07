@@ -35,6 +35,16 @@ Use the Makefile instead of raw script paths:
 
 **Important:** `site/style.css` is a static source file, not generated. `make clean` deliberately leaves it alone. `make ci` will fail if it is missing.
 
+## Local Development
+
+Avoid running `make all` or `make ci` on every local change — `make fetch` hits the NIFS API and can cause unnecessary load. Use the granular targets instead:
+
+- **Template/HTML changes:** `make build` (reads existing `data/stats.json`).
+- **Stats logic changes:** `make stats && make build` (recomputes stats from existing raw data, then rebuilds).
+- **Fresh data from API:** `make fetch && make stats && make build` (or `make all`).
+
+Only run `make ci` when you want the full pipeline plus file-existence checks.
+
 ## Architecture
 
 - **NIFS API stage ID:** `700912` (OBOS-ligaen 2026), hardcoded in `scripts/fetch_data.py`.
