@@ -96,6 +96,12 @@ Static files in `site/` (style.css, og-image.png, favicon.svg, sitemap.xml) are 
 - **Site content, README, and user-facing text:** Norwegian (bokmål)
 - **Primary color:** `#002145` (Godset blue), defined in `site/style.css` `:root`
 
+## Naming Conventions
+
+- **Variable names, function names, anchors, IDs:** Avoid team-specific identifiers. Do not use "godset", "stromsgodset", "Strømsgodset", or any team name in code identifiers, HTML `id`s, URL anchors, or data keys. Use neutral/generic names like `top_scorers`, `last_matches`, `upcoming_matches`, `home_stats`, `points`, `table`, etc.
+- **Team name strings in code/API calls:** Use the exact API name `Strømsgodset` when constructing API requests or comparing against API responses. The existing constant `GODSET_NAME` is the one allowed exception for this hardcoded API name; it may be renamed to something more generic in the future.
+- **User-facing text:** "Godset" and "Godsets" are fine in Norwegian labels and headings that users see (e.g. "Godsets målscorere"), but keep all code identifiers neutral.
+
 ## Testing / Verification
 
 There are no unit tests, linters, or formatters configured yet. The only verification is `make ci`, which checks file existence and validates that `data/stats.json` contains the expected structure (`godset` and `table` keys). Run `make all && make serve` to preview locally before committing.
