@@ -2,8 +2,6 @@
 
 ![image](./assets/og-image.svg)
 
-> Live-oppdatering av Strømsgodsets vei tilbake til Eliteserien.
-
 **Se siden live: https://godset.mats.codes**
 
 En enkel, statisk nettside som viser nøkkeltall og tabellstatus for
