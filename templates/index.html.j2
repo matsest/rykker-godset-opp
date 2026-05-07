@@ -88,14 +88,28 @@
     </header>
 
     <nav class="site-nav" aria-label="Seksjoner">
-        <div class="nav-scroll">
-            <a href="#nokkeltall">Nøkkeltall</a>
-            <a href="#opprykksstatus">Opprykksstatus</a>
-            <a href="#ligastatistikk">Ligastatistikk</a>
-            <a href="#form">Form</a>
-            <a href="#siste-resultater">Resultater</a>
-            <a href="#kommende-kamper">Kamper</a>
-            <a href="#tabell">Tabell</a>
+        <div class="nav-inner">
+            <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" type="button">
+                <span class="sr-only">Meny</span>
+                <svg class="icon-menu" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                    <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <svg class="icon-close" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                    <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="6" y1="18" x2="18" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <div class="nav-menu" id="nav-menu">
+                <a href="#nokkeltall">Nøkkeltall</a>
+                <a href="#opprykksstatus">Opprykksstatus</a>
+                <a href="#ligastatistikk">Ligastatistikk</a>
+                <a href="#form">Form</a>
+                <a href="#siste-resultater">Resultater</a>
+                <a href="#kommende-kamper">Kamper</a>
+                <a href="#tabell">Tabell</a>
+            </div>
         </div>
     </nav>
 
@@ -351,5 +365,25 @@
             <p class="footer-note">Bygget med ekte kjærlighet 💙 og <a href="https://github.com/matsest/rykker-godset-opp" target="_blank" rel="noopener">åpen kildekode</a> av <a href="https://github.com/matsest" target="_blank" rel="noopener">Mats Estensen</a> · Kontakt: <a href="mailto:contact@mxe.no">contact@mxe.no</a></p>
         </div>
     </footer>
+    <script>
+    (function() {
+        var toggle = document.querySelector('.nav-toggle');
+        var menu = document.getElementById('nav-menu');
+        if (!toggle || !menu) return;
+
+        toggle.addEventListener('click', function() {
+            var expanded = toggle.getAttribute('aria-expanded') === 'true';
+            toggle.setAttribute('aria-expanded', String(!expanded));
+            menu.classList.toggle('is-open');
+        });
+
+        menu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                toggle.setAttribute('aria-expanded', 'false');
+                menu.classList.remove('is-open');
+            });
+        });
+    })();
+    </script>
 </body>
 </html>
