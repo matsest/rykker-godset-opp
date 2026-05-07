@@ -210,7 +210,7 @@
                     </thead>
                     <tbody>
                         {% for t in table %}
-                        <tr class="{% if t.name == 'Strømsgodset' %}highlight{% endif %} {% if t.position <= 2 %}promotion{% elif t.position <= 6 %}qualification{% elif t.position >= 15 %}relegation{% endif %}">
+                        <tr class="{% if t.name == 'Strømsgodset' %}highlight{% endif %} {% if t.position <= 2 %}promotion{% elif t.position <= 6 %}qualification{% elif t.position == 14 %}relegation-playoff{% elif t.position >= 15 %}relegation{% endif %}">
                             <td class="pos">{{ t.position }}</td>
                             <td class="team">{{ t.display_name }}</td>
                             <td>{{ t.played }}</td>
@@ -228,6 +228,7 @@
             <div class="legend">
                 <span class="legend-item"><span class="legend-box promotion"></span> Direkte opprykk</span>
                 <span class="legend-item"><span class="legend-box qualification"></span> Kvalifisering</span>
+                <span class="legend-item"><span class="legend-box relegation-playoff"></span> Nedrykkskvalifisering</span>
                 <span class="legend-item"><span class="legend-box relegation"></span> Nedrykk</span>
             </div>
         </section>

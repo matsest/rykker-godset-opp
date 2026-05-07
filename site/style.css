@@ -14,6 +14,7 @@
     --loss: #dc3545;
     --promotion: #28a745;
     --qualification: #17a2b8;
+    --relegation-playoff: #fd7e14;
     --relegation: #dc3545;
 }
 
@@ -441,6 +442,10 @@ body {
     background: rgba(23, 162, 184, 0.08);
 }
 
+.league-table tbody tr.relegation-playoff {
+    background: rgba(253, 126, 20, 0.08);
+}
+
 .league-table tbody tr.relegation {
     background: rgba(220, 53, 69, 0.08);
 }
@@ -459,6 +464,10 @@ body {
     background: rgba(23, 162, 184, 0.15);
 }
 
+.league-table tbody tr.relegation-playoff:hover {
+    background: rgba(253, 126, 20, 0.15);
+}
+
 .league-table tbody tr.relegation:hover {
     background: rgba(220, 53, 69, 0.15);
 }
@@ -474,6 +483,10 @@ body {
 
 .league-table tbody tr.qualification td.pos {
     color: var(--qualification);
+}
+
+.league-table tbody tr.relegation-playoff td.pos {
+    color: var(--relegation-playoff);
 }
 
 .league-table tbody tr.relegation td.pos {
@@ -510,6 +523,10 @@ body {
 
 .legend-box.qualification {
     background: var(--qualification);
+}
+
+.legend-box.relegation-playoff {
+    background: var(--relegation-playoff);
 }
 
 .legend-box.relegation {
