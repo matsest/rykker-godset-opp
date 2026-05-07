@@ -59,7 +59,7 @@ def load_json(path: str) -> dict | list:
 
 
 def extract_match_stats(match_detail: dict) -> dict:
-    """Extract relevant stats from a single match detail response."""
+    """Extract relevant stats and goalscorers from a single match detail response."""
     result = match_detail.get("result", {})
     home_goals = result.get("homeScore90")
     away_goals = result.get("awayScore90")
@@ -77,6 +77,26 @@ def extract_match_stats(match_detail: dict) -> dict:
     def pick(stats):
         return {k: stats.get(k) for k in MATCH_STAT_KEYS if stats.get(k) is not None}
 
+    # Extract goalscorers (typeId 2 = goal) and assists (typeId 5 = assist)
+    goalscorers = []
+    assists = []
+    for event in match_detail.get("matchEvents", []):
+        event_type = event.get("matchEventTypeId")
+        person = event.get("person") or {}
+        team = event.get("team") or {}
+        if event_type == 2:
+            goalscorers.append({
+                "name": person.get("name"),
+                "team": team.get("name"),
+                "minute": event.get("time"),
+            })
+        elif event_type == 5:
+            assists.append({
+                "name": person.get("name"),
+                "team": team.get("name"),
+                "minute": event.get("time"),
+            })
+
     return {
         "home_team": home_team,
         "away_team": away_team,
@@ -84,6 +104,8 @@ def extract_match_stats(match_detail: dict) -> dict:
         "away_stats": pick(away_raw),
         "home_goals": home_goals,
         "away_goals": away_goals,
+        "goalscorers": goalscorers,
+        "assists": assists,
     }
 
 
@@ -100,7 +122,10 @@ def fetch_match_stats_incremental(matches_data: list, cache: dict) -> dict:
         completed_ids.append(match_id)
 
     cached_ids = set(updated_cache.keys())
-    missing_ids = [mid for mid in completed_ids if mid not in cached_ids]
+    missing_ids = [
+        mid for mid in completed_ids
+        if mid not in cached_ids or "assists" not in updated_cache.get(mid, {})
+    ]
 
     print(f"Match stats: {len(completed_ids)} completed, {len(cached_ids)} cached, {len(missing_ids)} to fetch", file=sys.stderr)
 

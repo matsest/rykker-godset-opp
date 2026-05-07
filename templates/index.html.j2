@@ -79,6 +79,7 @@
                 <a href="#form">Form</a>
                 <a href="#siste-resultater">Resultater</a>
                 <a href="#kommende-kamper">Kamper</a>
+<a href="#toppscorer">Målpoeng</a>
                 <a href="#tabell">Tabell</a>
             </div>
         </div>
@@ -290,6 +291,37 @@
             </div>
             <p class="section-link"><a href="https://www.godset.no/terminliste" target="_blank" rel="noopener">Se alle kommende kamper på godset.no →</a></p>
         </section>
+
+        {# Top Scorers #}
+        {% if top_scorers %}
+        <section class="section" id="toppscorer">
+            <h2 class="section-title"><a href="#toppscorer">Målpoeng</a></h2>
+            <div class="table-wrapper">
+                <table class="league-table topscorer-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Spiller</th>
+                            <th>Mål</th>
+                            <th>Assists</th>
+                            <th>Målpoeng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in top_scorers %}
+                        <tr>
+                            <td class="pos">{{ loop.index }}</td>
+                            <td class="team">{{ s.name }}</td>
+                            <td>{{ s.goals }}</td>
+                            <td>{{ s.assists }}</td>
+                            <td class="points">{{ s.points }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
 
         {# Table #}
         <section class="section" id="tabell">

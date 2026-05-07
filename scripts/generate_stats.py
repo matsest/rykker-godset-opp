@@ -178,6 +178,35 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
     return result
 
 
+def calculate_top_scorers(match_stats: dict) -> list[dict]:
+    """Aggregate team goalscorers and assists across all matches and return sorted list by goal points."""
+    scorers: dict[str, dict] = {}
+    for match_id, data in match_stats.items():
+        for g in data.get("goalscorers", []):
+            name = g.get("name")
+            team = g.get("team")
+            if not name or team != GODSET_NAME:
+                continue
+            if name not in scorers:
+                scorers[name] = {"name": name, "goals": 0, "assists": 0}
+            scorers[name]["goals"] += 1
+
+        for a in data.get("assists", []):
+            name = a.get("name")
+            team = a.get("team")
+            if not name or team != GODSET_NAME:
+                continue
+            if name not in scorers:
+                scorers[name] = {"name": name, "goals": 0, "assists": 0}
+            scorers[name]["assists"] += 1
+
+    for s in scorers.values():
+        s["points"] = s["goals"] + s["assists"]
+
+    sorted_scorers = sorted(scorers.values(), key=lambda x: (x["points"], x["goals"]), reverse=True)
+    return sorted_scorers
+
+
 def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
     """Calculate league rankings for each stat category."""
     rankings = {}
@@ -408,6 +437,8 @@ def main():
                 "vs_table": comparison,
             }
 
+    top_scorers = calculate_top_scorers(match_stats)
+
     stats = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "season": {
@@ -417,6 +448,7 @@ def main():
             "total_rounds": stage_info.get("numberOfRounds", 30),
             "current_round": max((m["round"] for m in completed), default=0),
         },
+        "top_scorers": top_scorers,
         "godset": {
             "name": GODSET_NAME,
             "short_name": godset_row.get("shortName", "Godset"),
