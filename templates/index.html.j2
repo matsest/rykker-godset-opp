@@ -288,7 +288,10 @@
                 {% for m in last_matches %}
                 <div class="match-row match-{{ m.result|lower }}">
                     <span class="match-date">{{ m.date[:10] }}</span>
-                    <span class="match-teams">{{ m.home_team }} – {{ m.away_team }}</span>
+                    <span class="match-teams">
+                        {% if m.is_home %}{{ m.away_team }}{% else %}{{ m.home_team }}{% endif %}
+                        <span class="match-venue">{% if m.is_home %}(Hjemme){% else %}(Borte){% endif %}</span>
+                    </span>
                     <span class="match-score">{{ m.score }}</span>
                     <span class="match-result">
                         {% if m.result == 'W' %}Seier{% elif m.result == 'D' %}Uavgjort{% else %}Tap{% endif %}
@@ -306,7 +309,10 @@
                 {% for m in upcoming_matches %}
                 <div class="match-row match-upcoming">
                     <span class="match-date">{{ m.date[:10] }}</span>
-                    <span class="match-teams">{{ m.home_team }} – {{ m.away_team }}</span>
+                    <span class="match-teams">
+                        {% if m.is_home %}{{ m.away_team }}{% else %}{{ m.home_team }}{% endif %}
+                        <span class="match-venue">{% if m.is_home %}(Hjemme){% else %}(Borte){% endif %}</span>
+                    </span>
                     <span class="match-round">Runde {{ m.round }}</span>
                 </div>
                 {% endfor %}

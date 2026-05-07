@@ -593,6 +593,12 @@ body {
     text-align: right;
 }
 
+.match-venue {
+    font-weight: 400;
+    color: var(--gray-600);
+    margin-left: 0.25rem;
+}
+
 /* Table */
 .table-wrapper {
     overflow-x: auto;
