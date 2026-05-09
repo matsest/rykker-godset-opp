@@ -111,6 +111,77 @@ def calculate_last_5_points(matches_data: list) -> dict[str, int]:
     return last_5_points
 
 
+def calculate_defensive_distributions(matches_data: list) -> dict[str, dict]:
+    """Calculate clean sheets and low-conceded matches per team."""
+    team_stats: dict[str, dict] = {}
+    for m in matches_data:
+        result = m.get("result", {})
+        home_score = result.get("homeScore90")
+        away_score = result.get("awayScore90")
+        if home_score is None or away_score is None:
+            continue
+
+        home = m["homeTeam"]["name"]
+        away = m["awayTeam"]["name"]
+
+        for team, conceded in [(home, away_score), (away, home_score)]:
+            if team not in team_stats:
+                team_stats[team] = {"clean_sheets": 0, "low_conceded": 0, "high_conceded": 0}
+            if conceded == 0:
+                team_stats[team]["clean_sheets"] += 1
+            if conceded <= 1:
+                team_stats[team]["low_conceded"] += 1
+            if conceded >= 2:
+                team_stats[team]["high_conceded"] += 1
+
+    return team_stats
+
+
+def calculate_home_away_averages(matches_data: list) -> dict[str, dict]:
+    """Calculate points per game for home and away matches per team."""
+    team_home: dict[str, list[int]] = {}
+    team_away: dict[str, list[int]] = {}
+
+    for m in matches_data:
+        result = m.get("result", {})
+        home_score = result.get("homeScore90")
+        away_score = result.get("awayScore90")
+        if home_score is None or away_score is None:
+            continue
+
+        home = m["homeTeam"]["name"]
+        away = m["awayTeam"]["name"]
+
+        if home_score == away_score:
+            home_points = 1
+            away_points = 1
+        elif home_score > away_score:
+            home_points = 3
+            away_points = 0
+        else:
+            home_points = 0
+            away_points = 3
+
+        if home not in team_home:
+            team_home[home] = []
+        team_home[home].append(home_points)
+
+        if away not in team_away:
+            team_away[away] = []
+        team_away[away].append(away_points)
+
+    averages = {}
+    all_teams = set(team_home.keys()) | set(team_away.keys())
+    for team in all_teams:
+        home_games = team_home.get(team, [])
+        away_games = team_away.get(team, [])
+        home_avg = round(sum(home_games) / len(home_games), 2) if home_games else 0.0
+        away_avg = round(sum(away_games) / len(away_games), 2) if away_games else 0.0
+        averages[team] = {"home_avg": home_avg, "away_avg": away_avg}
+
+    return averages
+
+
 def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list) -> list[dict]:
     """Aggregate match-level stats per team and combine with table data."""
     # Initialize with table data
@@ -122,15 +193,40 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "short_name": row.get("shortName", name),
             "position": row["place"],
             "played": row["played"],
+            "points": row["points"],
+            "points_per_game": round(row["points"] / row["played"], 2) if row["played"] > 0 else 0.0,
             "goals_scored": row["goalsScored"],
             "goals_conceded": row["goalsConceded"],
             "goal_difference": row["goalDifference"],
             "total_shots": 0,
             "shots_on_goal": 0,
+            "shots_off_target": 0,
             "chances": 0,
             "possession_sum": 0,
             "possession_matches": 0,
+            "clean_sheets": 0,
+            "low_conceded": 0,
+            "high_conceded": 0,
+            "shots_on_goal_against": 0,
+            "chances_against": 0,
+            "home_avg": 0.0,
+            "away_avg": 0.0,
         }
+
+    # Defensive distributions
+    defensive_dist = calculate_defensive_distributions(matches_data)
+    for name, dist in defensive_dist.items():
+        if name in teams:
+            teams[name]["clean_sheets"] = dist["clean_sheets"]
+            teams[name]["low_conceded"] = dist["low_conceded"]
+            teams[name]["high_conceded"] = dist["high_conceded"]
+
+    # Home and away averages
+    home_away_avgs = calculate_home_away_averages(matches_data)
+    for name, avgs in home_away_avgs.items():
+        if name in teams:
+            teams[name]["home_avg"] = avgs["home_avg"]
+            teams[name]["away_avg"] = avgs["away_avg"]
 
     # Points from last 5 matches
     last_5_points = calculate_last_5_points(matches_data)
@@ -145,7 +241,10 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
         home_stats = data.get("home_stats", {})
         away_stats = data.get("away_stats", {})
 
-        for team_name, stats in [(home_team, home_stats), (away_team, away_stats)]:
+        for team_name, stats, opponent_stats in [
+            (home_team, home_stats, away_stats),
+            (away_team, away_stats, home_stats),
+        ]:
             if team_name not in teams:
                 continue
             t = teams[team_name]
@@ -153,23 +252,33 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
                 t["total_shots"] += stats["totalShots"]
             if "shotsOnGoal" in stats and stats["shotsOnGoal"] is not None:
                 t["shots_on_goal"] += stats["shotsOnGoal"]
+            if "shotsOffTarget" in stats and stats["shotsOffTarget"] is not None:
+                t["shots_off_target"] += stats["shotsOffTarget"]
             if "chances" in stats and stats["chances"] is not None:
                 t["chances"] += stats["chances"]
             if "possession" in stats and stats["possession"] is not None:
                 t["possession_sum"] += stats["possession"]
                 t["possession_matches"] += 1
+            # Opponent stats (against)
+            if "shotsOnGoal" in opponent_stats and opponent_stats["shotsOnGoal"] is not None:
+                t["shots_on_goal_against"] += opponent_stats["shotsOnGoal"]
+            if "chances" in opponent_stats and opponent_stats["chances"] is not None:
+                t["chances_against"] += opponent_stats["chances"]
 
     # Calculate derived stats and build final list
     result = []
     for name, t in teams.items():
         possession = round(t["possession_sum"] / t["possession_matches"], 1) if t["possession_matches"] > 0 else 0.0
         conversion_rate = round(t["goals_scored"] / t["shots_on_goal"] * 100, 1) if t["shots_on_goal"] > 0 else 0.0
+        accuracy = round(t["shots_on_goal"] / t["total_shots"] * 100, 1) if t["total_shots"] > 0 else 0.0
 
         result.append({
             "name": t["name"],
             "short_name": t["short_name"],
             "position": t["position"],
             "played": t["played"],
+            "points": t["points"],
+            "points_per_game": t["points_per_game"],
             "goals_scored": t["goals_scored"],
             "goals_conceded": t["goals_conceded"],
             "goal_difference": t["goal_difference"],
@@ -178,7 +287,15 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "chances": t["chances"],
             "possession": possession,
             "conversion_rate": conversion_rate,
+            "accuracy": accuracy,
             "points_last_5": t.get("points_last_5", 0),
+            "clean_sheets": t["clean_sheets"],
+            "low_conceded": t["low_conceded"],
+            "high_conceded": t["high_conceded"],
+            "shots_on_goal_against": t["shots_on_goal_against"],
+            "chances_against": t["chances_against"],
+            "home_avg": t["home_avg"],
+            "away_avg": t["away_avg"],
         })
 
     return result
@@ -227,7 +344,16 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
         ("chances", False),
         ("possession", False),
         ("conversion_rate", False),
+        ("accuracy", False),
+        ("points_per_game", False),
+        ("home_avg", False),
+        ("away_avg", False),
         ("points_last_5", False),
+        ("clean_sheets", False),
+        ("low_conceded", False),
+        ("high_conceded", True),
+        ("shots_on_goal_against", True),
+        ("chances_against", True),
     ]
 
     for field, ascending in categories:
@@ -237,7 +363,16 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
         else:
             valid = [(t["name"], t[field]) for t in team_stats if t[field] is not None and t[field] >= 0]
         sorted_teams = sorted(valid, key=lambda x: x[1], reverse=not ascending)
-        rankings[field] = sorted_teams
+
+        # Assign dense ranks (teams with same value get same rank)
+        ranked = []
+        current_rank = 1
+        for i, (name, value) in enumerate(sorted_teams):
+            if i > 0 and value != sorted_teams[i - 1][1]:
+                current_rank = i + 1
+            ranked.append((name, value, current_rank))
+
+        rankings[field] = ranked
 
     return rankings
 
@@ -245,9 +380,9 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
 def get_team_rank(team_name: str, rankings: dict, field: str) -> tuple | None:
     """Return (value, rank, total) for a team in a given ranking."""
     ranked = rankings.get(field, [])
-    for i, (name, value) in enumerate(ranked):
+    for name, value, rank in ranked:
         if name == team_name:
-            return (value, i + 1, len(ranked))
+            return (value, rank, len(ranked))
     return None
 
 
@@ -401,38 +536,67 @@ def main():
     team_stats = aggregate_team_stats(match_stats, table_rows, matches_data)
     rankings = calculate_rankings(team_stats)
 
-    # Build Godset rank info
-    rank_fields = {
-        "goals_scored": {"label": "Mål scoret", "format": "{value}"},
-        "goals_conceded": {"label": "Mål sluppet inn", "format": "{value}"},
-        "goal_difference": {"label": "Målforskjell", "format": "{value}"},
-        "total_shots": {"label": "Skudd totalt", "format": "{value}"},
-        "shots_on_goal": {"label": "Skudd på mål", "format": "{value}"},
-        "chances": {"label": "Sjanser skapt", "format": "{value}"},
-        "possession": {"label": "Ballbesittelse", "format": "{value}%"},
-        "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
-        "points_last_5": {"label": "Form (siste 5)", "format": "{value}"},
+    # Build Godset rank info grouped by category
+    rank_categories = {
+        "offense": {
+            "label": "Offensivt",
+            "fields": {
+                "goals_scored": {"label": "Mål scoret", "format": "{value}"},
+                "total_shots": {"label": "Skudd totalt", "format": "{value}"},
+                "shots_on_goal": {"label": "Skudd på mål", "format": "{value}"},
+                "chances": {"label": "Sjanser skapt", "format": "{value}"},
+                "accuracy": {"label": "Skuddnøyaktighet", "format": "{value}%"},
+                "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
+            },
+        },
+        "defense": {
+            "label": "Defensivt",
+            "fields": {
+                "goals_conceded": {"label": "Mål sluppet inn", "format": "{value}"},
+                "clean_sheets": {"label": "Clean sheets", "format": "{value}"},
+                "low_conceded": {"label": "≤1 mål sluppet inn", "format": "{value}"},
+                "high_conceded": {"label": "≥2 mål sluppet inn", "format": "{value}"},
+                "shots_on_goal_against": {"label": "Skudd på mål mot", "format": "{value}"},
+                "chances_against": {"label": "Sjanser mot", "format": "{value}"},
+            },
+        },
+        "efficiency": {
+            "label": "Kontroll og resultat",
+            "fields": {
+                "points_per_game": {"label": "Poeng per kamp", "format": "{value}"},
+                "home_avg": {"label": "Poengsnitt hjemme", "format": "{value}"},
+                "away_avg": {"label": "Poengsnitt borte", "format": "{value}"},
+                "goal_difference": {"label": "Målforskjell", "format": "{value}"},
+                "possession": {"label": "Ballbesittelse", "format": "{value}%"},
+            },
+        },
     }
 
     team_ranks = {}
-    for field, meta in rank_fields.items():
-        rank_info = get_team_rank(TEAM_NAME, rankings, field)
-        if rank_info:
-            value, rank, total = rank_info
-            comparison = compare_to_table(rank, position)
-            if field == "goal_difference":
-                display_value = f"{'+' if value > 0 else ''}{value}"
-            else:
-                display_value = meta["format"].format(value=value)
-            team_ranks[field] = {
-                "label": meta["label"],
-                "value": value,
-                "rank": rank,
-                "total": total,
-                "display_value": display_value,
-                "display_rank": f"{rank}. av {total}",
-                "vs_table": comparison,
-            }
+    for category_key, category in rank_categories.items():
+        category_items = {}
+        for field, meta in category["fields"].items():
+            rank_info = get_team_rank(TEAM_NAME, rankings, field)
+            if rank_info:
+                value, rank, total = rank_info
+                comparison = compare_to_table(rank, position)
+                if field == "goal_difference":
+                    display_value = f"{'+' if value > 0 else ''}{value}"
+                else:
+                    display_value = meta["format"].format(value=value)
+                category_items[field] = {
+                    "label": meta["label"],
+                    "value": value,
+                    "rank": rank,
+                    "total": total,
+                    "display_value": display_value,
+                    "display_rank": f"{rank}. av {total}",
+                    "vs_table": comparison,
+                }
+        team_ranks[category_key] = {
+            "label": category["label"],
+            "stats": category_items,
+        }
 
     top_scorers = calculate_top_scorers(match_stats)
 
@@ -512,9 +676,11 @@ def main():
     # Print rank summary
     if team_ranks:
         print(f"\nLigarankinger:", file=sys.stderr)
-        for field, info in team_ranks.items():
-            indicator = "↑" if info["vs_table"] == "better" else "↓" if info["vs_table"] == "worse" else "→"
-            print(f"  {info['label']}: {info['display_value']} ({info['display_rank']}) {indicator}", file=sys.stderr)
+        for category_key, category in team_ranks.items():
+            print(f"  {category['label']}:", file=sys.stderr)
+            for field, info in category["stats"].items():
+                indicator = "↑" if info["vs_table"] == "better" else "↓" if info["vs_table"] == "worse" else "→"
+                print(f"    {info['label']}: {info['display_value']} ({info['display_rank']}) {indicator}", file=sys.stderr)
 
 
 if __name__ == "__main__":

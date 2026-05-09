@@ -73,13 +73,13 @@
                 </svg>
             </button>
             <div class="nav-menu" id="nav-menu">
-                <a href="#nokkeltall">Nøkkeltall</a>
                 <a href="#opprykksstatus">Opprykksstatus</a>
+                <a href="#nokkeltall">Nøkkeltall</a>
                 <a href="#ligastatistikk">Ligastatistikk</a>
                 <a href="#form">Form</a>
                 <a href="#siste-resultater">Resultater</a>
                 <a href="#kommende-kamper">Kamper</a>
-<a href="#toppscorer">Målpoeng</a>
+                <a href="#toppscorer">Målpoeng</a>
                 <a href="#tabell">Tabell</a>
             </div>
         </div>
@@ -110,6 +110,25 @@
                 <div class="hero-stat">
                     <span class="hero-stat-value">{{ godset.played }}</span>
                     <span class="hero-stat-label">Kamper</span>
+                </div>
+            </div>
+        </section>
+
+        {# Promotion Status #}
+        <section class="section" id="opprykksstatus">
+            <h2 class="section-title"><a href="#opprykksstatus">Opprykksstatus</a></h2>
+            <div class="promo-grid promo-grid-3">
+                <div class="promo-item {% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st >= 0 and godset.position <= 1 %}promo-positive{% elif diff_1st >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st > 0 %}+{% endif %}{{ diff_1st }}</span>
+                    <span class="promo-label">Poeng unna 1. plass</span>
+                </div>
+                <div class="promo-item {% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd >= 0 and godset.position <= 2 %}promo-positive{% elif diff_2nd >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd > 0 %}+{% endif %}{{ diff_2nd }}</span>
+                    <span class="promo-label">Poeng unna 2. plass</span>
+                </div>
+                <div class="promo-item {% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th >= 0 and godset.position <= 6 %}promo-positive{% elif diff_6th >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th > 0 %}+{% endif %}{{ diff_6th }}</span>
+                    <span class="promo-label">Poeng unna 6. plass (kvalik)</span>
                 </div>
             </div>
         </section>
@@ -145,52 +164,6 @@
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if godset.points_per_game >= 2.0 %}stat-positive{% elif godset.points_per_game >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.points_per_game }}</span>
-                    <span class="stat-label">
-                        Poengsnitt per kamp
-                        <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: ≥2,0, Gul: ≥1,8, Rød: &lt;1,8</span>
-                        </span>
-                    </span>
-                </div>
-                <div class="stat-card {% if godset.home.avg >= 2.0 %}stat-positive{% elif godset.home.avg >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.home.avg }}</span>
-                    <span class="stat-label">
-                        Poengsnitt hjemme
-                        <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: ≥2,0, Gul: ≥1,8, Rød: &lt;1,8</span>
-                        </span>
-                    </span>
-                </div>
-                <div class="stat-card {% if godset.away.avg >= 2.0 %}stat-positive{% elif godset.away.avg >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.away.avg }}</span>
-                    <span class="stat-label">
-                        Poengsnitt borte
-                        <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: ≥2,0, Gul: ≥1,8, Rød: &lt;1,8</span>
-                        </span>
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        {# Promotion Status #}
-        <section class="section" id="opprykksstatus">
-            <h2 class="section-title"><a href="#opprykksstatus">Opprykksstatus</a></h2>
-            <div class="promo-grid promo-grid-3">
-                <div class="promo-item {% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st >= 0 and godset.position <= 1 %}promo-positive{% elif diff_1st >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st > 0 %}+{% endif %}{{ diff_1st }}</span>
-                    <span class="promo-label">Poeng unna 1. plass</span>
-                </div>
-                <div class="promo-item {% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd >= 0 and godset.position <= 2 %}promo-positive{% elif diff_2nd >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd > 0 %}+{% endif %}{{ diff_2nd }}</span>
-                    <span class="promo-label">Poeng unna 2. plass</span>
-                </div>
-                <div class="promo-item {% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th >= 0 and godset.position <= 6 %}promo-positive{% elif diff_6th >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th > 0 %}+{% endif %}{{ diff_6th }}</span>
-                    <span class="promo-label">Poeng unna 6. plass (kvalik)</span>
-                </div>
             </div>
         </section>
 
@@ -198,39 +171,80 @@
         {% if godset.ranks %}
         <section class="section" id="ligastatistikk">
             <h2 class="section-title"><a href="#ligastatistikk">Ligastatistikk</a></h2>
-            <div class="stats-grid">
-                {% for key, rank in godset.ranks.items() %}
-                <div class="stat-card {% if rank.vs_table == 'better' %}stat-positive{% elif rank.vs_table == 'worse' %}stat-negative{% else %}stat-warning{% endif %}">
-                    <span class="stat-value">{{ rank.display_value }}</span>
-                    <span class="stat-label">
-                        {{ rank.label }}
-                        {% if key == 'conversion_rate' %}
-                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er målprosent?">&#9432;
-                            <span class="tooltip-text">Andel av skudd på mål som ender i mål</span>
+            {% for category_key, category in godset.ranks.items() %}
+            <div class="stats-category">
+                <h3 class="stats-category-title">{{ category.label }}</h3>
+                <div class="stats-grid">
+                    {% for key, rank in category.stats.items() %}
+                    <div class="stat-card {% if rank.vs_table == 'better' %}stat-positive{% elif rank.vs_table == 'worse' %}stat-negative{% else %}stat-warning{% endif %}">
+                        <span class="stat-value">{{ rank.display_value }}</span>
+                        <span class="stat-label">
+                            {{ rank.label }}
+                            {% if key == 'conversion_rate' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva er målprosent?">&#9432;
+                                <span class="tooltip-text">Andel av skudd på mål som ender i mål</span>
+                            </span>
+                            {% elif key == 'points_last_5' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva er form?">&#9432;
+                                <span class="tooltip-text">Poeng fra de siste 5 kampene (maks 15 poeng)</span>
+                            </span>
+                            {% elif key == 'goals_scored' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr rangeringen?">&#9432;
+                                <span class="tooltip-text">Høyere er bedre</span>
+                            </span>
+                            {% elif key == 'goals_conceded' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr rangeringen?">&#9432;
+                                <span class="tooltip-text">Lavere er bedre</span>
+                            </span>
+                            {% elif key == 'clean_sheets' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva er clean sheet?">&#9432;
+                                <span class="tooltip-text">Antall kamper uten baklengsmål</span>
+                            </span>
+                            {% elif key == 'low_conceded' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Antall kamper med 0 eller 1 baklengsmål</span>
+                            </span>
+                        {% elif key == 'high_conceded' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                            <span class="tooltip-text">Antall kamper med 2 eller flere baklengsmål – lavere er bedre</span>
                         </span>
-                        {% elif key == 'points_last_5' %}
-                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er form?">&#9432;
-                            <span class="tooltip-text">Poeng fra de siste 5 kampene (maks 15 poeng)</span>
+                        {% elif key == 'accuracy' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er skuddnøyaktighet?">&#9432;
+                            <span class="tooltip-text">Andel av alle skudd som treffer mål</span>
                         </span>
-                        {% elif key == 'goals_scored' %}
-                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr rangeringen?">&#9432;
-                            <span class="tooltip-text">Høyere er bedre</span>
+                        {% elif key == 'shots_on_goal_against' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                            <span class="tooltip-text">Motstanderens skudd på mål mot laget – lavere er bedre</span>
                         </span>
-                        {% elif key == 'goals_conceded' %}
-                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr rangeringen?">&#9432;
-                            <span class="tooltip-text">Lavere er bedre</span>
+                        {% elif key == 'chances_against' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                            <span class="tooltip-text">Antall klare målsjanser motstanderen har skapt mot laget – lavere er bedre</span>
+                        </span>
+                        {% elif key == 'points_per_game' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er poeng per kamp?">&#9432;
+                            <span class="tooltip-text">Snitt poeng per kamp – høyere er bedre</span>
+                        </span>
+                        {% elif key == 'home_avg' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er poengsnitt hjemme?">&#9432;
+                            <span class="tooltip-text">Snitt poeng per hjemmekamp – høyere er bedre</span>
+                        </span>
+                        {% elif key == 'away_avg' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er poengsnitt borte?">&#9432;
+                            <span class="tooltip-text">Snitt poeng per bortekamp – høyere er bedre</span>
                         </span>
                         {% endif %}
-                    </span>
-                    <span class="stat-rank">
-                        {{ rank.display_rank }}
-                        <span class="rank-indicator {% if rank.vs_table == 'better' %}ind-better{% elif rank.vs_table == 'worse' %}ind-worse{% else %}ind-equal{% endif %}">
-                            {% if rank.vs_table == 'better' %}↑{% elif rank.vs_table == 'worse' %}↓{% else %}→{% endif %}
                         </span>
-                    </span>
+                        <span class="stat-rank">
+                            {{ rank.display_rank }}
+                            <span class="rank-indicator {% if rank.vs_table == 'better' %}ind-better{% elif rank.vs_table == 'worse' %}ind-worse{% else %}ind-equal{% endif %}">
+                                {% if rank.vs_table == 'better' %}↑{% elif rank.vs_table == 'worse' %}↓{% else %}→{% endif %}
+                            </span>
+                        </span>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </section>
         {% endif %}
 
