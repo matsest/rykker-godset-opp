@@ -70,8 +70,7 @@ Se [AGENTS](./AGENTS.md).
 
 ## CI/CD
 
-[GitHub Actions](./.github/workflows/update-site.yml) kjører `make ci` (fetch → stats → build + verifisering) hver
-time og ved manuell trigging. Siden publiseres til GitHub Pages.
+[GitHub Actions](./.github/workflows/update-site.yml) kjører `make ci` (fetch → stats → build + verifisering) hver dag og ved manuell trigging. Siden publiseres til GitHub Pages.
 
 ## Lisens
 
