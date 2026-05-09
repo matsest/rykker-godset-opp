@@ -869,6 +869,16 @@ body {
     }
 }
 
+.show-mobile {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .show-mobile {
+        display: inline;
+    }
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
     *,
