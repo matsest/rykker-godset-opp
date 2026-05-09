@@ -212,6 +212,14 @@
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva er form?">&#9432;
                             <span class="tooltip-text">Poeng fra de siste 5 kampene (maks 15 poeng)</span>
                         </span>
+                        {% elif key == 'goals_scored' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr rangeringen?">&#9432;
+                            <span class="tooltip-text">Høyere er bedre</span>
+                        </span>
+                        {% elif key == 'goals_conceded' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr rangeringen?">&#9432;
+                            <span class="tooltip-text">Lavere er bedre</span>
+                        </span>
                         {% endif %}
                     </span>
                     <span class="stat-rank">
@@ -232,15 +240,30 @@
             <div class="stats-grid">
                 <div class="stat-card {% if godset.won_last_5 >= 3 %}stat-positive{% elif godset.won_last_5 >= 1 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.won_last_5 }}-{{ godset.drawn_last_5 }}-{{ godset.lost_last_5 }}</span>
-                    <span class="stat-label">Seire – Uavgjort – Tap</span>
+                    <span class="stat-label">
+                        Seire – Uavgjort – Tap
+                        <span class="tooltip-trigger" tabindex="0">&#9432;
+                            <span class="tooltip-text">Grønn: ≥3 seire, Gul: ≥1 seier, Rød: 0 seire</span>
+                        </span>
+                    </span>
                 </div>
                 <div class="stat-card {% if godset.points_avg_last_5 >= 2.0 %}stat-positive{% elif godset.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ godset.points_avg_last_5 }}</span>
-                    <span class="stat-label">Poengsnitt (siste {{ last_matches|length }})</span>
+                    <span class="stat-label">
+                        Poengsnitt (siste {{ last_matches|length }})
+                        <span class="tooltip-trigger" tabindex="0">&#9432;
+                            <span class="tooltip-text">Grønn: ≥2,0, Gul: ≥1,8, Rød: &lt;1,8</span>
+                        </span>
+                    </span>
                 </div>
                 <div class="stat-card {% if godset.goal_difference_last_5 > 0 %}stat-positive{% elif godset.goal_difference_last_5 == 0 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{% if godset.goal_difference_last_5 > 0 %}+{% endif %}{{ godset.goal_difference_last_5|default(0, true) }}</span>
-                    <span class="stat-label">Målforskjell (siste {{ last_matches|length }})</span>
+                    <span class="stat-label">
+                        Målforskjell (siste {{ last_matches|length }})
+                        <span class="tooltip-trigger" tabindex="0">&#9432;
+                            <span class="tooltip-text">Grønn: Positiv, Gul: Null, Rød: Negativ</span>
+                        </span>
+                    </span>
                 </div>
             </div>
             <div class="form-row">
