@@ -4,7 +4,13 @@
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+MONTHS_NO = [
+    "januar", "februar", "mars", "april", "mai", "juni",
+    "juli", "august", "september", "oktober", "november", "desember",
+]
 
 RAW_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "raw")
 STATS_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stats.json")
@@ -440,7 +446,9 @@ def main():
     top_scorers = calculate_top_scorers(match_stats)
 
     stats = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": (
+            lambda d: f"{d.day}. {MONTHS_NO[d.month - 1]} {d.strftime('%H.%M')}"
+        )(datetime.now(ZoneInfo("Europe/Oslo"))),
         "season": {
             "year": stage_info.get("yearStart"),
             "stage_id": stage_info.get("id"),
