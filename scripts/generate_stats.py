@@ -10,7 +10,7 @@ RAW_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "raw")
 STATS_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stats.json")
 MATCH_STATS_PATH = os.path.join(RAW_DIR, "match_stats.json")
 
-GODSET_NAME = "Strømsgodset"
+TEAM_NAME = "Strømsgodset"
 PROMOTION_SPOTS = 2
 QUALIFICATION_SPOTS = 4  # 3rd to 6th
 RELEGATION_ZONE = 15
@@ -185,7 +185,7 @@ def calculate_top_scorers(match_stats: dict) -> list[dict]:
         for g in data.get("goalscorers", []):
             name = g.get("name")
             team = g.get("team")
-            if not name or team != GODSET_NAME:
+            if not name or team != TEAM_NAME:
                 continue
             if name not in scorers:
                 scorers[name] = {"name": name, "goals": 0, "assists": 0}
@@ -194,7 +194,7 @@ def calculate_top_scorers(match_stats: dict) -> list[dict]:
         for a in data.get("assists", []):
             name = a.get("name")
             team = a.get("team")
-            if not name or team != GODSET_NAME:
+            if not name or team != TEAM_NAME:
                 continue
             if name not in scorers:
                 scorers[name] = {"name": name, "goals": 0, "assists": 0}
@@ -265,19 +265,19 @@ def main():
     stage_info = table_data.get("stage", {})
 
     # Find Godset
-    godset_row = None
+    team_row = None
     for row in table_rows:
-        if row["name"] == GODSET_NAME:
-            godset_row = row
+        if row["name"] == TEAM_NAME:
+            team_row = row
             break
 
-    if godset_row is None:
-        print(f"ERROR: Could not find {GODSET_NAME} in table", file=sys.stderr)
+    if team_row is None:
+        print(f"ERROR: Could not find {TEAM_NAME} in table", file=sys.stderr)
         sys.exit(1)
 
-    position = godset_row["place"]
-    points = godset_row["points"]
-    played = godset_row["played"]
+    position = team_row["place"]
+    points = team_row["points"]
+    played = team_row["played"]
 
     status_key, status_text = determine_status(position)
 
@@ -291,13 +291,13 @@ def main():
     points_to_6th = sixth_place_points - points
 
     # Process all Godset matches
-    godset_matches = []
+    team_matches = []
     for m in matches_data:
         home = m["homeTeam"]["name"]
         away = m["awayTeam"]["name"]
-        if home == GODSET_NAME or away == GODSET_NAME:
-            result = parse_match_result(m, GODSET_NAME)
-            is_home = home == GODSET_NAME
+        if home == TEAM_NAME or away == TEAM_NAME:
+            result = parse_match_result(m, TEAM_NAME)
+            is_home = home == TEAM_NAME
             score = None
             goals_for = None
             goals_against = None
@@ -309,7 +309,7 @@ def main():
                 else:
                     goals_for = m["result"]["awayScore90"]
                     goals_against = m["result"]["homeScore90"]
-            godset_matches.append({
+            team_matches.append({
                 "date": m["timestamp"],
                 "home_team": home,
                 "away_team": away,
@@ -322,10 +322,10 @@ def main():
             })
 
     # Sort by timestamp
-    godset_matches.sort(key=lambda m: m["date"])
+    team_matches.sort(key=lambda m: m["date"])
 
-    completed = [m for m in godset_matches if m["result"] is not None]
-    upcoming = [m for m in godset_matches if m["result"] is None]
+    completed = [m for m in team_matches if m["result"] is not None]
+    upcoming = [m for m in team_matches if m["result"] is None]
 
     # Last 5 completed matches (overall)
     last_5 = completed[-5:] if len(completed) >= 5 else completed
@@ -417,9 +417,9 @@ def main():
         "points_last_5": {"label": "Form (siste 5)", "format": "{value}"},
     }
 
-    godset_ranks = {}
+    team_ranks = {}
     for field, meta in rank_fields.items():
-        rank_info = get_team_rank(GODSET_NAME, rankings, field)
+        rank_info = get_team_rank(TEAM_NAME, rankings, field)
         if rank_info:
             value, rank, total = rank_info
             comparison = compare_to_table(rank, position)
@@ -427,7 +427,7 @@ def main():
                 display_value = f"{'+' if value > 0 else ''}{value}"
             else:
                 display_value = meta["format"].format(value=value)
-            godset_ranks[field] = {
+            team_ranks[field] = {
                 "label": meta["label"],
                 "value": value,
                 "rank": rank,
@@ -450,16 +450,16 @@ def main():
         },
         "top_scorers": top_scorers,
         "godset": {
-            "name": GODSET_NAME,
-            "short_name": godset_row.get("shortName", "Godset"),
+            "name": TEAM_NAME,
+            "short_name": team_row.get("shortName", "Godset"),
             "position": position,
             "played": played,
-            "won": godset_row["won"],
-            "drawn": godset_row["draw"],
-            "lost": godset_row["lost"],
-            "goals_for": godset_row["goalsScored"],
-            "goals_against": godset_row["goalsConceded"],
-            "goal_difference": godset_row["goalDifference"],
+            "won": team_row["won"],
+            "drawn": team_row["draw"],
+            "lost": team_row["lost"],
+            "goals_for": team_row["goalsScored"],
+            "goals_against": team_row["goalsConceded"],
+            "goal_difference": team_row["goalDifference"],
             "points": points,
             "points_per_game": round(points / played, 2) if played else 0.0,
             "form_last_5": [m["result"] for m in last_5],
@@ -495,7 +495,7 @@ def main():
                 "points_to_2nd": points_to_2nd,
                 "points_to_6th": points_to_6th,
             },
-            "ranks": godset_ranks,
+            "ranks": team_ranks,
         },
         "last_matches": last_5,
         "upcoming_matches": next_5,
@@ -511,9 +511,9 @@ def main():
     print(f"Godset: {position}. plass, {points} poeng – {status_text}", file=sys.stderr)
 
     # Print rank summary
-    if godset_ranks:
+    if team_ranks:
         print(f"\nLigarankinger:", file=sys.stderr)
-        for field, info in godset_ranks.items():
+        for field, info in team_ranks.items():
             indicator = "↑" if info["vs_table"] == "better" else "↓" if info["vs_table"] == "worse" else "→"
             print(f"  {info['label']}: {info['display_value']} ({info['display_rank']}) {indicator}", file=sys.stderr)
 

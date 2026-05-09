@@ -99,7 +99,7 @@ Static files in `site/` (style.css, og-image.png, favicon.svg, sitemap.xml) are 
 ## Naming Conventions
 
 - **Variable names, function names, anchors, IDs:** Avoid team-specific identifiers. Do not use "godset", "stromsgodset", "Strømsgodset", or any team name in code identifiers, HTML `id`s, URL anchors, or data keys. Use neutral/generic names like `top_scorers`, `last_matches`, `upcoming_matches`, `home_stats`, `points`, `table`, etc.
-- **Team name strings in code/API calls:** Use the exact API name `Strømsgodset` when constructing API requests or comparing against API responses. The existing constant `GODSET_NAME` is the one allowed exception for this hardcoded API name; it may be renamed to something more generic in the future.
+- **Team name strings in code/API calls:** Use the exact API name `Strømsgodset` when constructing API requests or comparing against API responses.
 - **User-facing text:** "Godset" and "Godsets" are fine in Norwegian labels and headings that users see (e.g. "Godsets målscorere"), but keep all code identifiers neutral.
 
 ## Testing / Verification
