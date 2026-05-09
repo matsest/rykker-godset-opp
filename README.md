@@ -68,9 +68,11 @@ Se [AGENTS](./AGENTS.md).
 
 [NIFS - Norsk Internasjonal Fotballstatistikk](https://www.nifs.no) sitt [API](https://api.nifs.no/).
 
+Dataene caches via GitHub Actions Cache for å unngå unødvendige API-kall. Kun nye kamper hentes inn ved hver publisering.
+
 ## CI/CD
 
-[GitHub Actions](./.github/workflows/update-site.yml) kjører `make ci` (fetch → stats → build + verifisering) hver dag og ved manuell trigging. Siden publiseres til GitHub Pages.
+[GitHub Actions](./.github/workflows/update-site.yml) kjører `make ci` (fetch → stats → build + verifisering) hver dag og ved manuell trigging. Ved kampdager (ons, fre, lør, søn) kjøres det ytterligere to kjøringer på kveldstid. Siden publiseres til GitHub Pages.
 
 ## Lisens
 
