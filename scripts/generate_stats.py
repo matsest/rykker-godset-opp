@@ -398,7 +398,6 @@ def compare_to_table(rank: int, table_position: int) -> str:
 def main():
     table_data = load_raw("table")
     matches_data = load_raw("matches")
-    teams_data = load_raw("teams")
     match_stats = load_match_stats()
 
     # Extract table rows

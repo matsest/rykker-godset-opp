@@ -13,12 +13,13 @@ All Python scripts must be run via `uv run` (mise adds `.venv/bin` to PATH).
 
 ## Build Pipeline
 
-Three-step static-site generator. Order matters.
+Three-step static-site generator plus a validation step. Order matters.
 
 ```
 scripts/fetch_data.py      →  data/raw/*.json  (inkl. match_stats.json)
 scripts/generate_stats.py  →  data/stats.json
 scripts/build_site.py      →  site/index.html
+scripts/validate_ci.py     →  exit 0/1 (data integrity check)
 ```
 
 Use the Makefile instead of raw script paths:
@@ -28,8 +29,9 @@ Use the Makefile instead of raw script paths:
 | `make fetch` | Hits NIFS API (stage 700912) |
 | `make stats` | Reads `data/raw/`, writes `data/stats.json` |
 | `make build` | Reads `data/stats.json`, writes `site/index.html` |
+| `make validate` | Runs `scripts/validate_ci.py` for deep data-integrity checks |
 | `make all` | Runs fetch → stats → build in order |
-| `make ci` | Runs `make all` + verifies `site/index.html` and `site/style.css` exist |
+| `make ci` | Runs `make all` + `make validate` + verifies static assets exist |
 | `make serve` | `python -m http.server 8000` inside `site/` |
 | `make clean` | Deletes generated files (`data/raw/*.json`, `data/stats.json`, `site/index.html`) |
 
@@ -43,7 +45,7 @@ Avoid running `make all` or `make ci` on every local change — `make fetch` hit
 - **Stats logic changes:** `make stats && make build` (recomputes stats from existing raw data, then rebuilds).
 - **Fresh data from API:** `make fetch && make stats && make build` (or `make all`).
 
-Only run `make ci` when you want the full pipeline plus file-existence checks.
+Only run `make ci` when you want the full pipeline plus data-integrity checks. You can also run `make validate` independently to verify existing data without rebuilding.
 
 ## Architecture
 
@@ -52,7 +54,7 @@ Only run `make ci` when you want the full pipeline plus file-existence checks.
 - **Template engine:** Jinja2 (`templates/index.html.j2`).
 - **Output:** Single-file static site (`site/index.html` + `site/style.css`). No JS bundler, no framework.
 - **Promotion rules (2026):** 1-2 direct promotion, 3-6 qualification, 14 relegation playoff, 15-16 direct relegation. Reflected in CSS classes and stats logic.
-- **Match stats caching:** `fetch_data.py` incrementally fetches per-match statistics (`matches/{id}/`) and caches them in `data/raw/match_stats.json` to minimize API calls.
+- **Match stats caching:** `fetch_data.py` incrementally fetches per-match statistics (`matches/{id}/`) and caches them in `data/raw/match_stats.json` to minimize API calls. Note: `teams.json` is no longer fetched as it was unused by the pipeline.
 - **League-wide aggregation:** `generate_stats.py` aggregates per-team stats (shots, chances, possession, conversion rate) across all matches and calculates league rankings for each category, exposed via the `Ligastatistikk` section.
 - **Anchor links:** All page sections have `id` attributes and clickable headings for direct URL hash navigation.
 
@@ -104,4 +106,11 @@ Static files in `site/` (style.css, og-image.png, favicon.svg, sitemap.xml) are 
 
 ## Testing / Verification
 
-There are no unit tests, linters, or formatters configured yet. The only verification is `make ci`, which checks file existence and validates that `data/stats.json` contains the expected structure (`godset` and `table` keys). Run `make all && make serve` to preview locally before committing.
+There are no unit tests, linters, or formatters configured yet. The primary verification is `make validate` (also run as part of `make ci`), which performs deep data-integrity checks:
+
+- **Raw data validation:** `table.json` has a valid `teams` array, `Strømsgodset` is present, and `matches.json` is a list.
+- **Match stats coverage:** Warns if fewer than 80% of completed matches have cached stats.
+- **Stats structure:** `stats.json` contains all top-level keys and every nested key the Jinja template expects (`godset.*`, `season.*`, `table`, `team_stats`, etc.).
+- **Sanity checks:** `position` is within league bounds, `played` / `points` are non-negative, and `last_matches` / `upcoming_matches` are lists.
+
+Run `make all && make serve` to preview locally before committing.

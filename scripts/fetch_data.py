@@ -14,7 +14,6 @@ BASE_URL = "https://api.nifs.no"
 ENDPOINTS = {
     "table": f"/stages/{STAGE_ID}/table/",
     "matches": f"/stages/{STAGE_ID}/matches/",
-    "teams": f"/stages/{STAGE_ID}/teams/",
 }
 
 RAW_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "raw")
