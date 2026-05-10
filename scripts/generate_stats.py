@@ -547,6 +547,7 @@ def main():
                 "chances": {"label": "Sjanser skapt", "format": "{value}"},
                 "accuracy": {"label": "Skuddnøyaktighet", "format": "{value}%"},
                 "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
+                "goal_difference": {"label": "Målforskjell", "format": "{value}"},
             },
         },
         "defense": {
@@ -564,9 +565,8 @@ def main():
             "label": "Kontroll og resultat",
             "fields": {
                 "points_per_game": {"label": "Poeng per kamp", "format": "{value}"},
-                "home_avg": {"label": "Poengsnitt hjemme", "format": "{value}"},
-                "away_avg": {"label": "Poengsnitt borte", "format": "{value}"},
-                "goal_difference": {"label": "Målforskjell", "format": "{value}"},
+                "home_avg": {"label": "Poeng per hjemmekamp", "format": "{value}"},
+                "away_avg": {"label": "Poeng per bortekamp", "format": "{value}"},
                 "possession": {"label": "Ballbesittelse", "format": "{value}%"},
             },
         },
