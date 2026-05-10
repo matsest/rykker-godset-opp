@@ -9,8 +9,9 @@ updates:
       timezone: "Europe/Oslo"
     open-pull-requests-limit: 5
     groups:
-      patterns:
-        - '*'
+      python:
+        patterns:
+          - '*'
 
   - package-ecosystem: "github-actions"
     directory: "/"
