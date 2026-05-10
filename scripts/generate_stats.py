@@ -611,7 +611,7 @@ def main():
             "current_round": max((m["round"] for m in completed), default=0),
         },
         "top_scorers": top_scorers,
-        "godset": {
+        "team": {
             "name": TEAM_NAME,
             "short_name": team_row.get("shortName", "Godset"),
             "position": position,

@@ -110,7 +110,7 @@ There are no unit tests, linters, or formatters configured yet. The primary veri
 
 - **Raw data validation:** `table.json` has a valid `teams` array, `Strømsgodset` is present, and `matches.json` is a list.
 - **Match stats coverage:** Warns if fewer than 80% of completed matches have cached stats.
-- **Stats structure:** `stats.json` contains all top-level keys and every nested key the Jinja template expects (`godset.*`, `season.*`, `table`, `team_stats`, etc.).
+- **Stats structure:** `stats.json` contains all top-level keys and every nested key the Jinja template expects (`team.*`, `season.*`, `table`, `team_stats`, etc.).
 - **Sanity checks:** `position` is within league bounds, `played` / `points` are non-negative, and `last_matches` / `upcoming_matches` are lists.
 
 Run `make all && make serve` to preview locally before committing.

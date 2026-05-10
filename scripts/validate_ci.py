@@ -98,75 +98,75 @@ def validate_stats():
         return
 
     # Top-level keys
-    required_top = ["generated_at", "season", "top_scorers", "godset", "last_matches", "upcoming_matches", "table", "team_stats"]
+    required_top = ["generated_at", "season", "top_scorers", "team", "last_matches", "upcoming_matches", "table", "team_stats"]
     for key in required_top:
         if key not in stats:
             error(f"stats.json missing top-level key: '{key}'")
 
-    # godset structure
-    godset = stats.get("godset")
-    if not isinstance(godset, dict):
-        error("stats.json 'godset' is missing or not a dict")
+    # team structure
+    team = stats.get("team")
+    if not isinstance(team, dict):
+        error("stats.json 'team' is missing or not a dict")
         return
 
-    godset_required = [
+    team_required = [
         "name", "short_name", "position", "played", "won", "drawn", "lost",
         "goals_for", "goals_against", "goal_difference", "points", "points_per_game",
         "form_last_5", "points_last_5", "points_avg_last_5",
         "won_last_5", "drawn_last_5", "lost_last_5", "goal_difference_last_5",
         "home", "away", "promotion", "ranks",
     ]
-    for key in godset_required:
-        if key not in godset:
-            error(f"godset missing key: '{key}'")
+    for key in team_required:
+        if key not in team:
+            error(f"team missing key: '{key}'")
 
     # promotion structure
-    promo = godset.get("promotion")
+    promo = team.get("promotion")
     if isinstance(promo, dict):
         for key in ["status", "status_text", "gauge_percent", "spots_direct", "spots_qualification", "points_to_1st", "points_to_2nd", "points_to_6th"]:
             if key not in promo:
-                error(f"godset.promotion missing key: '{key}'")
+                error(f"team.promotion missing key: '{key}'")
     else:
-        error("godset.promotion is missing or not a dict")
+        error("team.promotion is missing or not a dict")
 
     # home / away structure
     for label, key in [("home", "home"), ("away", "away")]:
-        section = godset.get(key)
+        section = team.get(key)
         if isinstance(section, dict):
             for sub in ["played", "points", "avg", "played_last_5", "points_last_5", "avg_last_5"]:
                 if sub not in section:
-                    error(f"godset.{key} missing key: '{sub}'")
+                    error(f"team.{key} missing key: '{sub}'")
         else:
-            error(f"godset.{key} is missing or not a dict")
+            error(f"team.{key} is missing or not a dict")
 
     # ranks structure
-    ranks = godset.get("ranks")
+    ranks = team.get("ranks")
     if isinstance(ranks, dict):
         for cat in ["offense", "defense", "efficiency"]:
             if cat not in ranks:
-                warn(f"godset.ranks missing category: '{cat}'")
+                warn(f"team.ranks missing category: '{cat}'")
             else:
                 cat_data = ranks[cat]
                 if not isinstance(cat_data, dict) or "stats" not in cat_data:
-                    error(f"godset.ranks.{cat} has invalid structure")
+                    error(f"team.ranks.{cat} has invalid structure")
     else:
-        error("godset.ranks is missing or not a dict")
+        error("team.ranks is missing or not a dict")
 
     # Sanity checks
-    position = godset.get("position")
+    position = team.get("position")
     if isinstance(position, int):
         if not (1 <= position <= EXPECTED_TEAMS):
-            error(f"godset.position ({position}) is out of range 1-{EXPECTED_TEAMS}")
+            error(f"team.position ({position}) is out of range 1-{EXPECTED_TEAMS}")
     else:
-        error("godset.position is not an int")
+        error("team.position is not an int")
 
-    played = godset.get("played")
+    played = team.get("played")
     if isinstance(played, int) and played < 0:
-        error("godset.played is negative")
+        error("team.played is negative")
 
-    points = godset.get("points")
+    points = team.get("points")
     if isinstance(points, int) and points < 0:
-        error("godset.points is negative")
+        error("team.points is negative")
 
     # season structure
     season = stats.get("season")

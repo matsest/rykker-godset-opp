@@ -90,7 +90,7 @@
         <section class="hero">
             <div class="gauge">
                 <div class="gauge-bar">
-                    <div class="gauge-needle" style="left: {{ godset.promotion.gauge_percent }}%"></div>
+                    <div class="gauge-needle" style="left: {{ team.promotion.gauge_percent }}%"></div>
                 </div>
                 <div class="gauge-labels">
                     <span>Nei</span>
@@ -100,15 +100,15 @@
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <span class="hero-stat-value">{{ godset.position }}.</span>
+                    <span class="hero-stat-value">{{ team.position }}.</span>
                     <span class="hero-stat-label">Plassering</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-value">{{ godset.points }}</span>
+                    <span class="hero-stat-value">{{ team.points }}</span>
                     <span class="hero-stat-label">Poeng</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-value">{{ godset.played }}</span>
+                    <span class="hero-stat-value">{{ team.played }}</span>
                     <span class="hero-stat-label">Kamper spilt</span>
                 </div>
             </div>
@@ -118,16 +118,16 @@
         <section class="section" id="opprykksstatus">
             <h2 class="section-title"><a href="#opprykksstatus">Opprykksstatus</a></h2>
             <div class="promo-grid promo-grid-3">
-                <div class="promo-item {% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st >= 0 and godset.position <= 1 %}promo-positive{% elif diff_1st >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{% set diff_1st = -godset.promotion.points_to_1st %}{% if diff_1st > 0 %}+{% endif %}{{ diff_1st }}</span>
+                <div class="promo-item {% set diff_1st = -team.promotion.points_to_1st %}{% if diff_1st >= 0 and team.position <= 1 %}promo-positive{% elif diff_1st >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_1st = -team.promotion.points_to_1st %}{% if diff_1st > 0 %}+{% endif %}{{ diff_1st }}</span>
                     <span class="promo-label">Poeng unna 1. plass</span>
                 </div>
-                <div class="promo-item {% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd >= 0 and godset.position <= 2 %}promo-positive{% elif diff_2nd >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{% set diff_2nd = -godset.promotion.points_to_2nd %}{% if diff_2nd > 0 %}+{% endif %}{{ diff_2nd }}</span>
+                <div class="promo-item {% set diff_2nd = -team.promotion.points_to_2nd %}{% if diff_2nd >= 0 and team.position <= 2 %}promo-positive{% elif diff_2nd >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_2nd = -team.promotion.points_to_2nd %}{% if diff_2nd > 0 %}+{% endif %}{{ diff_2nd }}</span>
                     <span class="promo-label">Poeng unna 2. plass</span>
                 </div>
-                <div class="promo-item {% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th >= 0 and godset.position <= 6 %}promo-positive{% elif diff_6th >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
-                    <span class="promo-value">{% set diff_6th = -godset.promotion.points_to_6th %}{% if diff_6th > 0 %}+{% endif %}{{ diff_6th }}</span>
+                <div class="promo-item {% set diff_6th = -team.promotion.points_to_6th %}{% if diff_6th >= 0 and team.position <= 6 %}promo-positive{% elif diff_6th >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
+                    <span class="promo-value">{% set diff_6th = -team.promotion.points_to_6th %}{% if diff_6th > 0 %}+{% endif %}{{ diff_6th }}</span>
                     <span class="promo-label">Poeng unna 6. plass (kvalik)</span>
                 </div>
             </div>
@@ -137,8 +137,8 @@
         <section class="section" id="nokkeltall">
             <h2 class="section-title"><a href="#nokkeltall">Nøkkeltall</a></h2>
             <div class="stats-grid">
-                <div class="stat-card {% if godset.played > 0 %}{% set win_pct = (godset.won / godset.played * 100) %}{% if win_pct >= 58 %}stat-positive{% elif win_pct >= 42 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
-                    <span class="stat-value">{{ godset.won }}-{{ godset.drawn }}-{{ godset.lost }}</span>
+                <div class="stat-card {% if team.played > 0 %}{% set win_pct = (team.won / team.played * 100) %}{% if win_pct >= 58 %}stat-positive{% elif win_pct >= 42 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
+                    <span class="stat-value">{{ team.won }}-{{ team.drawn }}-{{ team.lost }}</span>
                     <span class="stat-label">
                         Seire – Uavgjort – Tap
                         <span class="tooltip-trigger" tabindex="0">&#9432;
@@ -146,8 +146,8 @@
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if godset.played > 0 %}{% set win_pct = (godset.won / godset.played * 100) %}{% if win_pct >= 58 %}stat-positive{% elif win_pct >= 42 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
-                    <span class="stat-value">{% if godset.played > 0 %}{{ (godset.won / godset.played * 100)|round|int }}%{% else %}0%{% endif %}</span>
+                <div class="stat-card {% if team.played > 0 %}{% set win_pct = (team.won / team.played * 100) %}{% if win_pct >= 58 %}stat-positive{% elif win_pct >= 42 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
+                    <span class="stat-value">{% if team.played > 0 %}{{ (team.won / team.played * 100)|round|int }}%{% else %}0%{% endif %}</span>
                     <span class="stat-label">
                         Seiersprosent
                         <span class="tooltip-trigger" tabindex="0">&#9432;
@@ -155,8 +155,8 @@
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if godset.points_per_game >= 1.93 %}stat-positive{% elif godset.points_per_game >= 1.53 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.points_per_game }}</span>
+                <div class="stat-card {% if team.points_per_game >= 1.93 %}stat-positive{% elif team.points_per_game >= 1.53 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ team.points_per_game }}</span>
                     <span class="stat-label">
                         Poeng per kamp
                         <span class="tooltip-trigger" tabindex="0">&#9432;
@@ -169,10 +169,10 @@
         </section>
 
         {# League Stats #}
-        {% if godset.ranks %}
+        {% if team.ranks %}
         <section class="section" id="ligastatistikk">
             <h2 class="section-title"><a href="#ligastatistikk">Ligastatistikk</a></h2>
-            {% for category_key, category in godset.ranks.items() %}
+            {% for category_key, category in team.ranks.items() %}
             <div class="stats-category">
                 <h3 class="stats-category-title">{{ category.label }}</h3>
                 <div class="stats-grid">
@@ -247,10 +247,10 @@
 
         {# Form #}
         <section class="section" id="form">
-            <h2 class="section-title"><a href="#form">Form siste {{ godset.form_last_5|length }} kamper</a></h2>
+            <h2 class="section-title"><a href="#form">Form siste {{ team.form_last_5|length }} kamper</a></h2>
             <div class="stats-grid">
-                <div class="stat-card {% if godset.won_last_5 >= 3 %}stat-positive{% elif godset.won_last_5 >= 1 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.won_last_5 }}-{{ godset.drawn_last_5 }}-{{ godset.lost_last_5 }}</span>
+                <div class="stat-card {% if team.won_last_5 >= 3 %}stat-positive{% elif team.won_last_5 >= 1 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ team.won_last_5 }}-{{ team.drawn_last_5 }}-{{ team.lost_last_5 }}</span>
                     <span class="stat-label">
                         Seire – Uavgjort – Tap
                         <span class="tooltip-trigger" tabindex="0">&#9432;
@@ -258,8 +258,8 @@
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if godset.points_avg_last_5 >= 2.0 %}stat-positive{% elif godset.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{{ godset.points_avg_last_5 }}</span>
+                <div class="stat-card {% if team.points_avg_last_5 >= 2.0 %}stat-positive{% elif team.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{{ team.points_avg_last_5 }}</span>
                     <span class="stat-label">
                         Poeng per kamp
                         <span class="tooltip-trigger" tabindex="0">&#9432;
@@ -267,8 +267,8 @@
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if godset.goal_difference_last_5 > 0 %}stat-positive{% elif godset.goal_difference_last_5 == 0 %}stat-warning{% else %}stat-negative{% endif %}">
-                    <span class="stat-value">{% if godset.goal_difference_last_5 > 0 %}+{% endif %}{{ godset.goal_difference_last_5|default(0, true) }}</span>
+                <div class="stat-card {% if team.goal_difference_last_5 > 0 %}stat-positive{% elif team.goal_difference_last_5 == 0 %}stat-warning{% else %}stat-negative{% endif %}">
+                    <span class="stat-value">{% if team.goal_difference_last_5 > 0 %}+{% endif %}{{ team.goal_difference_last_5|default(0, true) }}</span>
                     <span class="stat-label">
                         Målforskjell
                         <span class="tooltip-trigger" tabindex="0">&#9432;
@@ -287,7 +287,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <p class="form-points">{{ godset.points_last_5 }} poeng av 15 mulige</p>
+            <p class="form-points">{{ team.points_last_5 }} poeng av 15 mulige</p>
         </section>
 
         {# Last Matches #}
