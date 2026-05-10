@@ -3,6 +3,14 @@ name: Update and deploy site
 on:
   push:
     branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'templates/**'
+      - 'site/**'
+      - 'Makefile'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/update-site.yml'
   workflow_dispatch:
   schedule:
     - cron: '0 3 * * *'           # Hver dag 05:00 CEST – morgenoppdatering
