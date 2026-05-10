@@ -579,6 +579,7 @@ def main():
             if rank_info:
                 value, rank, total = rank_info
                 comparison = compare_to_table(rank, position)
+                tier = min(abs(rank - position), 3)
                 if field == "goal_difference":
                     display_value = f"{'+' if value > 0 else ''}{value}"
                 else:
@@ -591,6 +592,7 @@ def main():
                     "display_value": display_value,
                     "display_rank": f"{rank}. av {total}",
                     "vs_table": comparison,
+                    "vs_table_tier": tier,
                 }
         team_ranks[category_key] = {
             "label": category["label"],
