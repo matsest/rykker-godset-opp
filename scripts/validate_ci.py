@@ -114,7 +114,7 @@ def validate_stats():
         "goals_for", "goals_against", "goal_difference", "points", "points_per_game",
         "form_last_5", "points_last_5", "points_avg_last_5",
         "won_last_5", "drawn_last_5", "lost_last_5", "goal_difference_last_5",
-        "home", "away", "promotion", "ranks",
+        "home", "away", "promotion", "ranks", "goal_timing",
     ]
     for key in team_required:
         if key not in team:

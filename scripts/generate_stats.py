@@ -301,6 +301,51 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
     return result
 
 
+def calculate_goal_timing(match_stats: dict) -> dict:
+    """Calculate distribution of team goals scored in 15-minute intervals."""
+    intervals = [
+        (0, 15, "0–15"),
+        (16, 30, "16–30"),
+        (31, 45, "31–45"),
+        (46, 60, "46–60"),
+        (61, 75, "61–75"),
+        (76, 90, "76–90"),
+    ]
+    counts = [0] * len(intervals)
+
+    for data in match_stats.values():
+        for g in data.get("goalscorers", []):
+            if g.get("team") != TEAM_NAME:
+                continue
+            minute = g.get("minute")
+            if minute is None:
+                continue
+            # Bucket added-time goals into the last interval
+            if minute > 90:
+                counts[-1] += 1
+                continue
+            for i, (start, end, _label) in enumerate(intervals):
+                if start <= minute <= end:
+                    counts[i] += 1
+                    break
+
+    total = sum(counts)
+    result = []
+    for i, (start, end, label) in enumerate(intervals):
+        count = counts[i]
+        percent = round(count / total * 100, 1) if total > 0 else 0.0
+        result.append({
+            "label": label,
+            "count": count,
+            "percent": percent,
+        })
+
+    return {
+        "intervals": result,
+        "total": total,
+    }
+
+
 def calculate_top_scorers(match_stats: dict) -> list[dict]:
     """Aggregate team goalscorers and assists across all matches and return sorted list by goal points."""
     scorers: dict[str, dict] = {}
@@ -600,6 +645,7 @@ def main():
         }
 
     top_scorers = calculate_top_scorers(match_stats)
+    goal_timing = calculate_goal_timing(match_stats)
 
     stats = {
         "generated_at": (
@@ -660,6 +706,7 @@ def main():
                 "points_to_6th": points_to_6th,
             },
             "ranks": team_ranks,
+            "goal_timing": goal_timing,
         },
         "last_matches": last_5,
         "upcoming_matches": next_5,

@@ -85,6 +85,7 @@
                 <a href="#siste-resultater">Resultater</a>
                 <a href="#kommende-kamper">Kamper</a>
                 <a href="#toppscorer">Målpoeng</a>
+                <a href="#maltidspunkt">Måltidspunkt</a>
                 <a href="#tabell">Tabell</a>
             </div>
         </div>
@@ -363,6 +364,39 @@
                     </tbody>
                 </table>
             </div>
+        </section>
+        {% endif %}
+
+        {# Goal Timing #}
+        {% if team.goal_timing and team.goal_timing.total > 0 %}
+        <section class="section" id="maltidspunkt">
+            <h2 class="section-title"><a href="#maltidspunkt">Når scores målene?</a></h2>
+            <p class="section-intro">Fordeling av Godsets mål i 15-minuttersintervaller denne sesongen.</p>
+            <h3 class="stats-category-title">1. omgang</h3>
+            <div class="timing-chart">
+                {% for interval in team.goal_timing.intervals[:3] %}
+                <div class="timing-row">
+                    <span class="timing-label">{{ interval.label }}</span>
+                    <div class="timing-bar-bg">
+                        <div class="timing-bar" style="width: {{ interval.percent }}%"></div>
+                    </div>
+                    <span class="timing-value">{{ interval.count }}{% if team.goal_timing.total > 0 %} <span class="timing-percent">({{ interval.percent }}%)</span>{% endif %}</span>
+                </div>
+                {% endfor %}
+            </div>
+            <h3 class="stats-category-title">2. omgang</h3>
+            <div class="timing-chart">
+                {% for interval in team.goal_timing.intervals[3:] %}
+                <div class="timing-row">
+                    <span class="timing-label">{{ interval.label }}</span>
+                    <div class="timing-bar-bg">
+                        <div class="timing-bar" style="width: {{ interval.percent }}%"></div>
+                    </div>
+                    <span class="timing-value">{{ interval.count }}{% if team.goal_timing.total > 0 %} <span class="timing-percent">({{ interval.percent }}%)</span>{% endif %}</span>
+                </div>
+                {% endfor %}
+            </div>
+            <p class="stats-note">Totalt {{ team.goal_timing.total }} mål</p>
         </section>
         {% endif %}
 
