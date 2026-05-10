@@ -1,0 +1,29 @@
+{
+  "name": "Rykker Godset Opp?",
+  "short_name": "Rykker Godset Opp?",
+  "description": "Følg Strømsgodsets vei tilbake til Eliteserien. Tabell, form og statistikk i OBOS-ligaen 2026.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002145",
+  "theme_color": "#002145",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
