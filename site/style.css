@@ -533,6 +533,13 @@ body {
     margin-bottom: 0.75rem;
 }
 
+.form-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
 .form-badge {
     display: inline-flex;
     align-items: center;
@@ -543,6 +550,12 @@ body {
     font-weight: 700;
     font-size: 0.875rem;
     color: var(--white);
+}
+
+.form-venue {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-600);
 }
 
 .form-w {

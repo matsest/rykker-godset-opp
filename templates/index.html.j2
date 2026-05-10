@@ -277,10 +277,13 @@
                 </div>
             </div>
             <div class="form-row">
-                {% for r in godset.form_last_5 %}
-                <span class="form-badge form-{{ r|lower }}">
-                    {% if r == 'W' %}V{% elif r == 'D' %}U{% else %}T{% endif %}
-                </span>
+                {% for m in last_matches %}
+                <div class="form-item">
+                    <span class="form-badge form-{{ m.result|lower }}">
+                        {% if m.result == 'W' %}V{% elif m.result == 'D' %}U{% else %}T{% endif %}
+                    </span>
+                    <span class="form-venue">{% if m.is_home %}H{% else %}B{% endif %}</span>
+                </div>
                 {% endfor %}
             </div>
             <p class="form-points">{{ godset.points_last_5 }} poeng av 15 mulige</p>
