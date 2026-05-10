@@ -405,6 +405,14 @@ body {
     margin-top: 0.25rem;
 }
 
+.stats-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    margin-top: 0.75rem;
+    font-style: italic;
+}
+
 .rank-indicator {
     font-size: 0.9rem;
     font-weight: 700;
