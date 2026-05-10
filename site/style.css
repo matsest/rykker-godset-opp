@@ -844,7 +844,7 @@ body {
 
 .footer-note {
     margin-top: 0.5rem;
-    opacity: 0.7;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 0.75rem;
 }
 
