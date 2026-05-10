@@ -137,12 +137,12 @@
         <section class="section" id="nokkeltall">
             <h2 class="section-title"><a href="#nokkeltall">Nøkkeltall</a></h2>
             <div class="stats-grid">
-                <div class="stat-card {% if team.played > 0 %}{% set win_pct = (team.won / team.played * 100) %}{% if win_pct >= 58 %}stat-positive{% elif win_pct >= 42 %}stat-warning{% else %}stat-negative{% endif %}{% endif %}">
+                <div class="stat-card {% if team.points_per_game >= 1.93 %}stat-positive{% elif team.points_per_game >= 1.53 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ team.won }}-{{ team.drawn }}-{{ team.lost }}</span>
                     <span class="stat-label">
                         Seire – Uavgjort – Tap
                         <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: ≥58% seier, Gul: ≥42% seier, Rød: &lt;42% seier</span>
+                            <span class="tooltip-text">Grønn: ≥1,93 poeng/kamp, Gul: ≥1,53 poeng/kamp, Rød: &lt;1,53</span>
                         </span>
                     </span>
                 </div>
@@ -172,6 +172,7 @@
         {% if team.ranks %}
         <section class="section" id="ligastatistikk">
             <h2 class="section-title"><a href="#ligastatistikk">Ligastatistikk</a></h2>
+            <p class="section-intro">Viser hvor Godset ligger på ulike statistikker sammenlignet med resten av ligaen, og om laget presterer bedre eller dårligere enn tabellplasseringen skulle tilsi.</p>
             {% for category_key, category in team.ranks.items() %}
             <div class="stats-category">
                 <h3 class="stats-category-title">{{ category.label }}</h3>
@@ -249,21 +250,21 @@
         <section class="section" id="form">
             <h2 class="section-title"><a href="#form">Form siste {{ team.form_last_5|length }} kamper</a></h2>
             <div class="stats-grid">
-                <div class="stat-card {% if team.won_last_5 >= 3 %}stat-positive{% elif team.won_last_5 >= 1 %}stat-warning{% else %}stat-negative{% endif %}">
+                <div class="stat-card {% if team.points_avg_last_5 >= 1.93 %}stat-positive{% elif team.points_avg_last_5 >= 1.53 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ team.won_last_5 }}-{{ team.drawn_last_5 }}-{{ team.lost_last_5 }}</span>
                     <span class="stat-label">
                         Seire – Uavgjort – Tap
                         <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: ≥3 seire, Gul: ≥1 seier, Rød: 0 seire</span>
+                            <span class="tooltip-text">Grønn: ≥1,93 poeng/kamp, Gul: ≥1,53 poeng/kamp, Rød: &lt;1,53</span>
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if team.points_avg_last_5 >= 2.0 %}stat-positive{% elif team.points_avg_last_5 >= 1.8 %}stat-warning{% else %}stat-negative{% endif %}">
+                <div class="stat-card {% if team.points_avg_last_5 >= 1.93 %}stat-positive{% elif team.points_avg_last_5 >= 1.53 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ team.points_avg_last_5 }}</span>
                     <span class="stat-label">
                         Poeng per kamp
                         <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: ≥2,0, Gul: ≥1,8, Rød: &lt;1,8</span>
+                            <span class="tooltip-text">Grønn: ≥1,93, Gul: ≥1,53, Rød: &lt;1,53</span>
                         </span>
                     </span>
                 </div>
