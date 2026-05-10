@@ -586,12 +586,12 @@ def main():
             "label": "Offensivt",
             "fields": {
                 "goals_scored": {"label": "Mål scoret", "format": "{value}"},
+                "goal_difference": {"label": "Målforskjell", "format": "{value}"},
                 "total_shots": {"label": "Skudd totalt", "format": "{value}"},
                 "shots_on_goal": {"label": "Skudd på mål", "format": "{value}"},
                 "chances": {"label": "Sjanser skapt", "format": "{value}"},
                 "accuracy": {"label": "Skuddnøyaktighet", "format": "{value}%"},
                 "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
-                "goal_difference": {"label": "Målforskjell", "format": "{value}"},
             },
         },
         "defense": {
