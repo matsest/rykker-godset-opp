@@ -862,6 +862,34 @@ body {
     margin-right: 0.25rem;
 }
 
+.footer-tooltip-trigger {
+    position: relative;
+    cursor: help;
+    color: var(--white);
+    opacity: 1.0;
+    font-size: 0.7rem;
+    margin-left: 0rem;
+    text-decoration: underline;
+    display: inline-block;
+}
+
+.footer-tooltip-trigger:hover,
+.footer-tooltip-trigger:focus-visible {
+    opacity: 1;
+}
+
+.footer-tooltip-trigger .tooltip-text {
+    bottom: 125%;
+}
+
+.footer-tooltip-trigger:hover .tooltip-text,
+.footer-tooltip-trigger:active .tooltip-text,
+.footer-tooltip-trigger:focus-visible .tooltip-text,
+.footer-tooltip-trigger .tooltip-text.is-visible {
+    visibility: visible;
+    opacity: 1;
+}
+
 .action-btn {
     display: inline-flex;
     align-items: center;
