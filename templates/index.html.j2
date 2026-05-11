@@ -196,33 +196,53 @@
                             <span class="tooltip-trigger" tabindex="0" aria-label="Hva er form?">&#9432;
                                 <span class="tooltip-text">Poeng fra de siste 5 kampene (maks 15 poeng)</span>
                             </span>
-                        {% elif key == 'goals_conceded' %}
-                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr rangeringen?">&#9432;
-                                <span class="tooltip-text">Lavere er bedre</span>
+                            {% elif key == 'goals_scored' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Snitt mål scoret per kamp – høyere er bedre</span>
+                            </span>
+                            {% elif key == 'total_shots' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Snitt skudd per kamp – høyere er bedre</span>
+                            </span>
+                            {% elif key == 'shots_on_goal' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Snitt skudd på mål per kamp – høyere er bedre</span>
+                            </span>
+                            {% elif key == 'chances' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Snitt klare målsjanser skapt per kamp – høyere er bedre</span>
+                            </span>
+                            {% elif key == 'goal_difference' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Mål scoret minus mål sluppet inn – høyere er bedre</span>
+                            </span>
+                            {% elif key == 'possession' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Andel av kampen laget har ballen – høyere er bedre</span>
+                            </span>
+                            {% elif key == 'goals_conceded' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
+                                <span class="tooltip-text">Snitt mål sluppet inn per kamp – lavere er bedre</span>
                             </span>
                             {% elif key == 'clean_sheets' %}
                             <span class="tooltip-trigger" tabindex="0" aria-label="Hva er clean sheet?">&#9432;
-                                <span class="tooltip-text">Antall kamper uten baklengsmål</span>
+                                <span class="tooltip-text">Andel kamper uten baklengsmål – høyere er bedre</span>
                             </span>
                         {% elif key == 'low_conceded' %}
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
-                            <span class="tooltip-text">Antall kamper med 0 eller 1 baklengsmål – høyere er bedre</span>
+                            <span class="tooltip-text">Andel kamper med 0 eller 1 baklengsmål – høyere er bedre</span>
                         </span>
-                        {% elif key == 'high_conceded' %}
+                        {% elif key == 'total_shots_against' %}
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
-                            <span class="tooltip-text">Antall kamper med 2 eller flere baklengsmål – lavere er bedre</span>
-                        </span>
-                        {% elif key == 'accuracy' %}
-                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er skuddnøyaktighet?">&#9432;
-                            <span class="tooltip-text">Andel av alle skudd som treffer mål</span>
+                            <span class="tooltip-text">Snitt skudd mot laget per kamp – lavere er bedre</span>
                         </span>
                         {% elif key == 'shots_on_goal_against' %}
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
-                            <span class="tooltip-text">Motstanderens skudd på mål mot laget – lavere er bedre</span>
+                            <span class="tooltip-text">Snitt skudd på mål mot laget per kamp – lavere er bedre</span>
                         </span>
                         {% elif key == 'chances_against' %}
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
-                            <span class="tooltip-text">Antall klare målsjanser motstanderen har skapt mot laget – lavere er bedre</span>
+                            <span class="tooltip-text">Snitt klare målsjanser motstanderen skaper mot laget per kamp – lavere er bedre</span>
                         </span>
                         {% elif key == 'points_per_game' %}
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva er poeng per kamp?">&#9432;

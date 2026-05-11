@@ -207,10 +207,12 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "clean_sheets": 0,
             "low_conceded": 0,
             "high_conceded": 0,
+            "total_shots_against": 0,
             "shots_on_goal_against": 0,
             "chances_against": 0,
             "home_avg": 0.0,
             "away_avg": 0.0,
+            "stats_matches": 0,
         }
 
     # Defensive distributions
@@ -248,6 +250,7 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             if team_name not in teams:
                 continue
             t = teams[team_name]
+            t["stats_matches"] += 1
             if "totalShots" in stats and stats["totalShots"] is not None:
                 t["total_shots"] += stats["totalShots"]
             if "shotsOnGoal" in stats and stats["shotsOnGoal"] is not None:
@@ -260,10 +263,31 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
                 t["possession_sum"] += stats["possession"]
                 t["possession_matches"] += 1
             # Opponent stats (against)
+            if "totalShots" in opponent_stats and opponent_stats["totalShots"] is not None:
+                t["total_shots_against"] += opponent_stats["totalShots"]
             if "shotsOnGoal" in opponent_stats and opponent_stats["shotsOnGoal"] is not None:
                 t["shots_on_goal_against"] += opponent_stats["shotsOnGoal"]
             if "chances" in opponent_stats and opponent_stats["chances"] is not None:
                 t["chances_against"] += opponent_stats["chances"]
+
+    # Normalize per game / percentage to account for different matches played
+    for name, t in teams.items():
+        played = t["played"]
+        stats_matches = t.get("stats_matches", 0)
+        if played > 0:
+            t["goals_scored"] = round(t["goals_scored"] / played, 2)
+            t["goals_conceded"] = round(t["goals_conceded"] / played, 2)
+            t["clean_sheets"] = round(t["clean_sheets"] / played * 100, 1)
+            t["low_conceded"] = round(t["low_conceded"] / played * 100, 1)
+            t["high_conceded"] = round(t["high_conceded"] / played * 100, 1)
+        if stats_matches > 0:
+            t["total_shots"] = round(t["total_shots"] / stats_matches, 1)
+            t["shots_on_goal"] = round(t["shots_on_goal"] / stats_matches, 1)
+            t["shots_off_target"] = round(t["shots_off_target"] / stats_matches, 1)
+            t["chances"] = round(t["chances"] / stats_matches, 1)
+            t["total_shots_against"] = round(t["total_shots_against"] / stats_matches, 1)
+            t["shots_on_goal_against"] = round(t["shots_on_goal_against"] / stats_matches, 1)
+            t["chances_against"] = round(t["chances_against"] / stats_matches, 1)
 
     # Calculate derived stats and build final list
     result = []
@@ -292,6 +316,7 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "clean_sheets": t["clean_sheets"],
             "low_conceded": t["low_conceded"],
             "high_conceded": t["high_conceded"],
+            "total_shots_against": t["total_shots_against"],
             "shots_on_goal_against": t["shots_on_goal_against"],
             "chances_against": t["chances_against"],
             "home_avg": t["home_avg"],
@@ -397,6 +422,7 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
         ("clean_sheets", False),
         ("low_conceded", False),
         ("high_conceded", True),
+        ("total_shots_against", True),
         ("shots_on_goal_against", True),
         ("chances_against", True),
     ]
@@ -585,24 +611,23 @@ def main():
         "offense": {
             "label": "Offensivt",
             "fields": {
-                "goals_scored": {"label": "Mål scoret", "format": "{value}"},
-                "goal_difference": {"label": "Målforskjell", "format": "{value}"},
-                "total_shots": {"label": "Skudd totalt", "format": "{value}"},
-                "shots_on_goal": {"label": "Skudd på mål", "format": "{value}"},
-                "chances": {"label": "Sjanser skapt", "format": "{value}"},
-                "accuracy": {"label": "Skuddnøyaktighet", "format": "{value}%"},
+                "goals_scored": {"label": "Mål per kamp", "format": "{value}"},
+                "total_shots": {"label": "Skudd per kamp", "format": "{value}"},
+                "shots_on_goal": {"label": "Skudd på mål per kamp", "format": "{value}"},
+                "chances": {"label": "Sjanser per kamp", "format": "{value}"},
                 "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
+                "goal_difference": {"label": "Målforskjell", "format": "{value}"},
             },
         },
         "defense": {
             "label": "Defensivt",
             "fields": {
-                "goals_conceded": {"label": "Mål sluppet inn", "format": "{value}"},
-                "clean_sheets": {"label": "Clean sheets", "format": "{value}"},
-                "low_conceded": {"label": "≤1 mål sluppet inn", "format": "{value}"},
-                "high_conceded": {"label": "≥2 mål sluppet inn", "format": "{value}"},
-                "shots_on_goal_against": {"label": "Skudd på mål mot", "format": "{value}"},
-                "chances_against": {"label": "Sjanser mot", "format": "{value}"},
+                "goals_conceded": {"label": "Mål sluppet inn per kamp", "format": "{value}"},
+                "total_shots_against": {"label": "Skudd mot per kamp", "format": "{value}"},
+                "shots_on_goal_against": {"label": "Skudd på mål mot per kamp", "format": "{value}"},
+                "chances_against": {"label": "Sjanser mot per kamp", "format": "{value}"},
+                "clean_sheets": {"label": "Clean sheets", "format": "{value}%"},
+                "low_conceded": {"label": "≤1 mål sluppet inn", "format": "{value}%"},
             },
         },
         "efficiency": {
