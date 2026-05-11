@@ -295,6 +295,7 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
         possession = round(t["possession_sum"] / t["possession_matches"], 1) if t["possession_matches"] > 0 else 0.0
         conversion_rate = round(t["goals_scored"] / t["shots_on_goal"] * 100, 1) if t["shots_on_goal"] > 0 else 0.0
         accuracy = round(t["shots_on_goal"] / t["total_shots"] * 100, 1) if t["total_shots"] > 0 else 0.0
+        chance_conversion = round(t["goals_scored"] / t["chances"] * 100, 1) if t["chances"] > 0 else 0.0
 
         result.append({
             "name": t["name"],
@@ -312,6 +313,7 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "possession": possession,
             "conversion_rate": conversion_rate,
             "accuracy": accuracy,
+            "chance_conversion": chance_conversion,
             "points_last_5": t.get("points_last_5", 0),
             "clean_sheets": t["clean_sheets"],
             "low_conceded": t["low_conceded"],
@@ -412,9 +414,8 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
         ("total_shots", False),
         ("shots_on_goal", False),
         ("chances", False),
+        ("chance_conversion", False),
         ("possession", False),
-        ("conversion_rate", False),
-        ("accuracy", False),
         ("points_per_game", False),
         ("home_avg", False),
         ("away_avg", False),
@@ -615,7 +616,7 @@ def main():
                 "total_shots": {"label": "Skudd per kamp", "format": "{value}"},
                 "shots_on_goal": {"label": "Skudd på mål per kamp", "format": "{value}"},
                 "chances": {"label": "Sjanser per kamp", "format": "{value}"},
-                "conversion_rate": {"label": "Målprosent", "format": "{value}%"},
+                "chance_conversion": {"label": "Sjanseomsetning", "format": "{value}%"},
                 "goal_difference": {"label": "Målforskjell", "format": "{value}"},
             },
         },

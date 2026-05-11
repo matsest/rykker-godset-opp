@@ -188,11 +188,7 @@
                         <span class="stat-value">{{ rank.display_value }}</span>
                         <span class="stat-label">
                             {{ rank.label }}
-                            {% if key == 'conversion_rate' %}
-                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva er målprosent?">&#9432;
-                                <span class="tooltip-text">Andel av skudd på mål som ender i mål</span>
-                            </span>
-                            {% elif key == 'points_last_5' %}
+                            {% if key == 'points_last_5' %}
                             <span class="tooltip-trigger" tabindex="0" aria-label="Hva er form?">&#9432;
                                 <span class="tooltip-text">Poeng fra de siste 5 kampene (maks 15 poeng)</span>
                             </span>
@@ -211,6 +207,10 @@
                             {% elif key == 'chances' %}
                             <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
                                 <span class="tooltip-text">Snitt klare målsjanser skapt per kamp – høyere er bedre</span>
+                            </span>
+                            {% elif key == 'chance_conversion' %}
+                            <span class="tooltip-trigger" tabindex="0" aria-label="Hva er sjanseomsetning?">&#9432;
+                                <span class="tooltip-text">Andel av klare målsjanser som ender i mål – høyere er bedre</span>
                             </span>
                             {% elif key == 'goal_difference' %}
                             <span class="tooltip-trigger" tabindex="0" aria-label="Hva betyr dette?">&#9432;
