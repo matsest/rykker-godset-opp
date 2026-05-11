@@ -738,6 +738,11 @@ def main():
         },
     }
 
+    def format_stat_value(value, field, fmt):
+        if field == "goal_difference":
+            return f"{'+' if value > 0 else ''}{value}"
+        return fmt.format(value=value)
+
     team_ranks = {}
     for category_key, category in rank_categories.items():
         category_items = {}
@@ -747,10 +752,7 @@ def main():
                 value, rank, total = rank_info
                 comparison = compare_to_table(rank, position)
                 tier = min(abs(rank - position), 3)
-                if field == "goal_difference":
-                    display_value = f"{'+' if value > 0 else ''}{value}"
-                else:
-                    display_value = meta["format"].format(value=value)
+                display_value = format_stat_value(value, field, meta["format"])
                 category_items[field] = {
                     "label": meta["label"],
                     "value": value,
@@ -760,6 +762,15 @@ def main():
                     "display_rank": f"{rank}. av {total}",
                     "vs_table": comparison,
                     "vs_table_tier": tier,
+                    "full_table": [
+                        {
+                            "rank": r,
+                            "name": n,
+                            "value": v,
+                            "display_value": format_stat_value(v, field, meta["format"]),
+                        }
+                        for n, v, r in rankings.get(field, [])
+                    ],
                 }
         team_ranks[category_key] = {
             "label": category["label"],

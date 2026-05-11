@@ -274,12 +274,20 @@
                         </span>
                         {% endif %}
                         </span>
+                        {% if rank.full_table %}
+                        <button type="button" class="stat-rank rank-btn" id="rank-btn-{{ category_key }}-{{ key }}" aria-haspopup="dialog" aria-controls="modal-{{ category_key }}-{{ key }}">
+                        {% else %}
                         <span class="stat-rank">
+                        {% endif %}
                             {{ rank.display_rank }}
                             <span class="rank-indicator ind-{{ rank.vs_table }} tier-{{ rank.vs_table_tier|default(0) }}">
                                 {% if rank.vs_table == 'better' %}{% if rank.vs_table_tier|default(0) >= 3 %}▲▲{% else %}▲{% endif %}{% elif rank.vs_table == 'worse' %}{% if rank.vs_table_tier|default(0) >= 3 %}▼▼{% else %}▼{% endif %}{% else %}▶{% endif %}
                             </span>
+                        {% if rank.full_table %}
+                        </button>
+                        {% else %}
                         </span>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -481,6 +489,44 @@
         </section>
     </main>
 
+    {% for category_key, category in team.ranks.items() %}
+    {% for key, rank in category.stats.items() %}
+    {% if rank.full_table %}
+    <div class="modal" id="modal-{{ category_key }}-{{ key }}" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ category_key }}-{{ key }}" hidden>
+        <div class="modal-backdrop" data-close-modal></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title-{{ category_key }}-{{ key }}">{{ rank.label }} – hele ligaen</h3>
+                <button class="modal-close" type="button" aria-label="Lukk" data-close-modal>&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-wrapper">
+                    <table class="league-table ranking-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Lag</th>
+                                <th>{{ rank.label }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rank.full_table %}
+                            <tr class="{% if row.name == 'Strømsgodset' %}highlight{% endif %}">
+                                <td class="pos">{{ row.rank }}</td>
+                                <td class="team">{{ row.name }}</td>
+                                <td class="points">{{ row.display_value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+
     <footer class="site-footer">
         <div class="container">
             <p><a href="https://github.com/matsest/rykker-godset-opp/actions/workflows/update-site.yml" target="_blank" rel="noopener">Sist oppdatert: {{ generated_at }}</a> · Data fra <a href="https://www.nifs.no/" target="_blank" rel="noopener">NIFS</a></p>
@@ -580,6 +626,42 @@
             document.querySelectorAll('.tooltip-text.is-visible').forEach(function(t) {
                 t.classList.remove('is-visible');
             });
+        });
+
+        // Stat rank modals
+        document.querySelectorAll('.rank-btn').forEach(function(openBtn) {
+            var modalId = openBtn.getAttribute('aria-controls');
+            var modal = document.getElementById(modalId);
+            if (!modal) return;
+            var closeBtns = modal.querySelectorAll('[data-close-modal]');
+            function doOpen() {
+                modal.hidden = false;
+                document.body.style.overflow = 'hidden';
+                var closeBtn = modal.querySelector('.modal-close');
+                if (closeBtn) closeBtn.focus();
+            }
+            function doClose() {
+                modal.hidden = true;
+                document.body.style.overflow = '';
+                openBtn.focus();
+            }
+            openBtn.addEventListener('click', doOpen);
+            closeBtns.forEach(function(btn) {
+                btn.addEventListener('click', doClose);
+            });
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var openModal = document.querySelector('.modal:not([hidden])');
+                if (openModal) {
+                    openModal.hidden = true;
+                    document.body.style.overflow = '';
+                    var btnId = openModal.id.replace('modal-', 'rank-btn-');
+                    var btn = document.getElementById(btnId);
+                    if (btn) btn.focus();
+                }
+            }
         });
     })();
     </script>
