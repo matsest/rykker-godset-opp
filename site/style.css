@@ -398,6 +398,10 @@ body {
     border-left: 4px solid var(--loss);
 }
 
+.stat-neutral {
+    border-left: 4px solid var(--gray-600);
+}
+
 .stat-rank {
     font-size: 0.85rem;
     font-weight: 600;
@@ -440,6 +444,9 @@ body {
 
 .stat-negative.tier-2 { background: rgba(220, 53, 69, 0.04); }
 .stat-negative.tier-3 { background: rgba(220, 53, 69, 0.08); }
+
+.stat-neutral.tier-2 { background: rgba(222, 226, 230, 0.25); }
+.stat-neutral.tier-3 { background: rgba(222, 226, 230, 0.40); }
 
 .tier-2 .rank-indicator { font-size: 1rem; }
 .tier-3 .rank-indicator { font-size: 1.1rem; }
