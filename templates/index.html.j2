@@ -248,6 +248,22 @@
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva er poeng per kamp?">&#9432;
                             <span class="tooltip-text">Snitt poeng per kamp – høyere er bedre</span>
                         </span>
+                        {% elif key == 'first_goal_pct' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er førstemål?">&#9432;
+                            <span class="tooltip-text">Andel kamper laget scorer først – høyere er bedre</span>
+                        </span>
+                        {% elif key == 'win_when_first_pct' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er seier ved førstemål?">&#9432;
+                            <span class="tooltip-text">Andel kamper vunnet etter å ha scoret først – høyere er bedre</span>
+                        </span>
+                        {% elif key == 'conceded_first_pct' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er baklengs først?">&#9432;
+                            <span class="tooltip-text">Andel kamper laget slipper inn først – lavere er bedre</span>
+                        </span>
+                        {% elif key == 'win_when_conceded_pct' %}
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er seier ved baklengs først?">&#9432;
+                            <span class="tooltip-text">Andel kamper vunnet etter å ha sluppet inn først – høyere er bedre</span>
+                        </span>
                         {% elif key == 'home_avg' %}
                         <span class="tooltip-trigger" tabindex="0" aria-label="Hva er poengsnitt hjemme?">&#9432;
                             <span class="tooltip-text">Snitt poeng per hjemmekamp – høyere er bedre</span>

@@ -142,7 +142,7 @@ def validate_stats():
     # ranks structure
     ranks = team.get("ranks")
     if isinstance(ranks, dict):
-        for cat in ["offense", "defense", "efficiency"]:
+        for cat in ["offense", "defense", "result", "control"]:
             if cat not in ranks:
                 warn(f"team.ranks missing category: '{cat}'")
             else:

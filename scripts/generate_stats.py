@@ -182,7 +182,7 @@ def calculate_home_away_averages(matches_data: list) -> dict[str, dict]:
     return averages
 
 
-def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list) -> list[dict]:
+def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list, first_goal_stats: dict) -> list[dict]:
     """Aggregate match-level stats per team and combine with table data."""
     # Initialize with table data
     teams = {}
@@ -213,6 +213,10 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "home_avg": 0.0,
             "away_avg": 0.0,
             "stats_matches": 0,
+            "first_goal_pct": 0.0,
+            "win_when_first_pct": 0.0,
+            "conceded_first_pct": 0.0,
+            "win_when_conceded_pct": 0.0,
         }
 
     # Defensive distributions
@@ -270,6 +274,15 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             if "chances" in opponent_stats and opponent_stats["chances"] is not None:
                 t["chances_against"] += opponent_stats["chances"]
 
+    # Merge first goal stats
+    for name, t in teams.items():
+        fg = first_goal_stats.get(name)
+        if fg:
+            t["first_goal_pct"] = fg["first_goal_pct"]
+            t["win_when_first_pct"] = fg["win_when_first_pct"]
+            t["conceded_first_pct"] = fg["conceded_first_pct"]
+            t["win_when_conceded_pct"] = fg["win_when_conceded_pct"]
+
     # Normalize per game / percentage to account for different matches played
     for name, t in teams.items():
         played = t["played"]
@@ -323,8 +336,75 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "chances_against": t["chances_against"],
             "home_avg": t["home_avg"],
             "away_avg": t["away_avg"],
+            "first_goal_pct": t["first_goal_pct"],
+            "win_when_first_pct": t["win_when_first_pct"],
+            "conceded_first_pct": t["conceded_first_pct"],
+            "win_when_conceded_pct": t["win_when_conceded_pct"],
         })
 
+    return result
+
+
+def calculate_first_goal_stats_league(match_stats: dict) -> dict[str, dict]:
+    """Calculate first goal and comeback stats for all teams from match stats."""
+    # team -> {matches, first_goal_scored, wins_when_first, conceded_first, wins_when_conceded}
+    stats: dict[str, dict] = {}
+
+    for data in match_stats.values():
+        home_team = data.get("home_team")
+        away_team = data.get("away_team")
+        home_goals = data.get("home_goals", 0)
+        away_goals = data.get("away_goals", 0)
+        goalscorers = data.get("goalscorers", [])
+
+        if not goalscorers:
+            continue
+
+        # Find first goal
+        first_goal = min(goalscorers, key=lambda g: g.get("minute", 999))
+        first_goal_team = first_goal.get("team")
+        if not first_goal_team:
+            continue
+
+        for team, is_home in [(home_team, True), (away_team, False)]:
+            if team not in stats:
+                stats[team] = {
+                    "matches": 0,
+                    "first_goal_scored": 0,
+                    "wins_when_first": 0,
+                    "conceded_first": 0,
+                    "wins_when_conceded": 0,
+                }
+            stats[team]["matches"] += 1
+
+            if home_goals == away_goals:
+                points = 1
+            elif is_home:
+                points = 3 if home_goals > away_goals else 0
+            else:
+                points = 3 if away_goals > home_goals else 0
+
+            if first_goal_team == team:
+                stats[team]["first_goal_scored"] += 1
+                if points == 3:
+                    stats[team]["wins_when_first"] += 1
+            else:
+                stats[team]["conceded_first"] += 1
+                if points == 3:
+                    stats[team]["wins_when_conceded"] += 1
+
+    # Calculate percentages
+    result = {}
+    for team, s in stats.items():
+        matches = s["matches"]
+        first = s["first_goal_scored"]
+        conceded = s["conceded_first"]
+        result[team] = {
+            "first_goal_pct": round(first / matches * 100, 1) if matches > 0 else 0.0,
+            "win_when_first_pct": round(s["wins_when_first"] / first * 100, 1) if first > 0 else 0.0,
+            "conceded_first_pct": round(conceded / matches * 100, 1) if matches > 0 else 0.0,
+            "win_when_conceded_pct": round(s["wins_when_conceded"] / conceded * 100, 1) if conceded > 0 else 0.0,
+        }
     return result
 
 
@@ -417,6 +497,10 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
         ("chance_conversion", False),
         ("possession", False),
         ("points_per_game", False),
+        ("first_goal_pct", False),
+        ("win_when_first_pct", False),
+        ("conceded_first_pct", True),
+        ("win_when_conceded_pct", False),
         ("home_avg", False),
         ("away_avg", False),
         ("points_last_5", False),
@@ -603,8 +687,11 @@ def main():
             "form": row.get("lastSixMatches", "").split(",") if row.get("lastSixMatches") else [],
         })
 
+    # Calculate first goal stats league-wide
+    first_goal_stats_league = calculate_first_goal_stats_league(match_stats)
+
     # Aggregate league-wide stats from match stats cache
-    team_stats = aggregate_team_stats(match_stats, table_rows, matches_data)
+    team_stats = aggregate_team_stats(match_stats, table_rows, matches_data, first_goal_stats_league)
     rankings = calculate_rankings(team_stats)
 
     # Build Godset rank info grouped by category
@@ -631,13 +718,22 @@ def main():
                 "low_conceded": {"label": "≤1 mål sluppet inn", "format": "{value}%"},
             },
         },
-        "efficiency": {
-            "label": "Kontroll og resultat",
+        "result": {
+            "label": "Resultat",
             "fields": {
                 "points_per_game": {"label": "Poeng per kamp", "format": "{value}"},
                 "home_avg": {"label": "Poeng per hjemmekamp", "format": "{value}"},
                 "away_avg": {"label": "Poeng per bortekamp", "format": "{value}"},
+            },
+        },
+        "control": {
+            "label": "Kontroll",
+            "fields": {
                 "possession": {"label": "Ballbesittelse", "format": "{value}%"},
+                "first_goal_pct": {"label": "Førstemål", "format": "{value}%"},
+                "win_when_first_pct": {"label": "Seier ved førstemål", "format": "{value}%"},
+                "conceded_first_pct": {"label": "Baklengs først", "format": "{value}%"},
+                "win_when_conceded_pct": {"label": "Seier ved baklengs først", "format": "{value}%"},
             },
         },
     }
