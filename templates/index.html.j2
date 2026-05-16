@@ -330,12 +330,12 @@
             </div>
             <div class="form-row">
                 {% for m in last_matches %}
-                <div class="form-item">
+                <button type="button" class="form-item match-btn" aria-haspopup="dialog" aria-controls="modal-match-{{ loop.index }}">
                     <span class="form-badge form-{{ m.result|lower }}">
                         {% if m.result == 'W' %}V{% elif m.result == 'D' %}U{% else %}T{% endif %}
                     </span>
                     <span class="form-venue">{% if m.is_home %}H{% else %}B{% endif %}</span>
-                </div>
+                </button>
                 {% endfor %}
             </div>
             <p class="form-points">{{ team.points_last_5 }} poeng av 15 mulige</p>
@@ -346,7 +346,7 @@
             <h2 class="section-title"><a href="#siste-resultater">Siste resultater</a></h2>
             <div class="matches-list">
                 {% for m in last_matches %}
-                <div class="match-row match-{{ m.result|lower }}">
+                <button type="button" class="match-row match-{{ m.result|lower }} match-btn" aria-haspopup="dialog" aria-controls="modal-match-{{ loop.index }}">
                     <span class="match-date">{{ m.date[:10] }}</span>
                     <span class="match-teams">
                         {% if m.is_home %}{{ m.away_team }}{% else %}{{ m.home_team }}{% endif %}
@@ -356,7 +356,7 @@
                     <span class="match-result">
                         {% if m.result == 'W' %}Seier{% elif m.result == 'D' %}Uavgjort{% else %}Tap{% endif %}
                     </span>
-                </div>
+                </button>
                 {% endfor %}
             </div>
             <p class="section-link"><a href="https://www.godset.no/resultater" target="_blank" rel="noopener">Se alle resultater på godset.no →</a></p>
@@ -527,6 +527,143 @@
     {% endfor %}
     {% endfor %}
 
+    {# Match detail modals #}
+    {% for m in last_matches %}
+    {% if m.stats %}
+    <div class="modal" id="modal-match-{{ loop.index }}" role="dialog" aria-modal="true" aria-labelledby="modal-match-title-{{ loop.index }}" hidden>
+        <div class="modal-backdrop" data-close-modal></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-match-title-{{ loop.index }}">
+                    {{ m.home_team }} – {{ m.away_team }}
+                </h3>
+                <button class="modal-close" type="button" aria-label="Lukk" data-close-modal>&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="match-modal-meta">
+                    <span class="match-modal-date">{{ m.date[:10] }}</span>
+                    <span class="match-modal-venue">{% if m.is_home %}Hjemme{% else %}Borte{% endif %}</span>
+                    <span class="match-modal-result form-badge form-{{ m.result|lower }}">
+                        {% if m.result == 'W' %}Seier{% elif m.result == 'D' %}Uavgjort{% else %}Tap{% endif %}
+                    </span>
+                </div>
+
+                {% if m.home_score is not none and m.away_score is not none %}
+                <div class="match-modal-scoreboard result-{{ m.result|lower }}">
+                    <div class="match-modal-team match-modal-team-home">
+                        <span class="match-modal-team-name">{{ m.home_team }}</span>
+                        <span class="match-modal-team-label">Hjemme</span>
+                        <span class="match-modal-team-score">{{ m.home_score }}</span>
+                    </div>
+                    <div class="match-modal-score-separator">–</div>
+                    <div class="match-modal-team match-modal-team-away">
+                        <span class="match-modal-team-name">{{ m.away_team }}</span>
+                        <span class="match-modal-team-label">Borte</span>
+                        <span class="match-modal-team-score">{{ m.away_score }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if m.stats.possession is not none or m.stats.total_shots is not none or m.stats.shots_on_goal is not none or m.stats.chances is not none %}
+                <div class="match-modal-section">
+                    <h4>Kampstatistikk</h4>
+                    {% set home_possession = m.stats.possession if m.is_home else m.stats.opponent_possession %}
+                    {% set away_possession = m.stats.opponent_possession if m.is_home else m.stats.possession %}
+                    {% set home_shots = m.stats.total_shots if m.is_home else m.stats.opponent_total_shots %}
+                    {% set away_shots = m.stats.opponent_total_shots if m.is_home else m.stats.total_shots %}
+                    {% set home_sog = m.stats.shots_on_goal if m.is_home else m.stats.opponent_shots_on_goal %}
+                    {% set away_sog = m.stats.opponent_shots_on_goal if m.is_home else m.stats.shots_on_goal %}
+                    {% set home_chances = m.stats.chances if m.is_home else m.stats.opponent_chances %}
+                    {% set away_chances = m.stats.opponent_chances if m.is_home else m.stats.chances %}
+                    <div class="match-stat-compare">
+                        <div class="match-stat-compare-header">
+                            <span>{{ m.home_team }}</span>
+                            <span></span>
+                            <span>{{ m.away_team }}</span>
+                        </div>
+                        {% if home_possession is not none and away_possession is not none %}
+                        <div class="match-stat-compare-row">
+                            <span class="match-stat-home {% if home_possession > away_possession %}match-stat-best{% elif home_possession < away_possession %}match-stat-worst{% endif %}">{{ home_possession }}%</span>
+                            <span class="match-stat-label">Ballbesittelse</span>
+                            <span class="match-stat-away {% if away_possession > home_possession %}match-stat-best{% elif away_possession < home_possession %}match-stat-worst{% endif %}">{{ away_possession }}%</span>
+                        </div>
+                        {% endif %}
+                        {% if home_shots is not none and away_shots is not none %}
+                        <div class="match-stat-compare-row">
+                            <span class="match-stat-home {% if home_shots > away_shots %}match-stat-best{% elif home_shots < away_shots %}match-stat-worst{% endif %}">{{ home_shots }}</span>
+                            <span class="match-stat-label">Skudd</span>
+                            <span class="match-stat-away {% if away_shots > home_shots %}match-stat-best{% elif away_shots < home_shots %}match-stat-worst{% endif %}">{{ away_shots }}</span>
+                        </div>
+                        {% endif %}
+                        {% if home_sog is not none and away_sog is not none %}
+                        <div class="match-stat-compare-row">
+                            <span class="match-stat-home {% if home_sog > away_sog %}match-stat-best{% elif home_sog < away_sog %}match-stat-worst{% endif %}">{{ home_sog }}</span>
+                            <span class="match-stat-label">Skudd på mål</span>
+                            <span class="match-stat-away {% if away_sog > home_sog %}match-stat-best{% elif away_sog < home_sog %}match-stat-worst{% endif %}">{{ away_sog }}</span>
+                        </div>
+                        {% endif %}
+                        {% if home_chances is not none and away_chances is not none %}
+                        <div class="match-stat-compare-row">
+                            <span class="match-stat-home {% if home_chances > away_chances %}match-stat-best{% elif home_chances < away_chances %}match-stat-worst{% endif %}">{{ home_chances }}</span>
+                            <span class="match-stat-label">Sjanser</span>
+                            <span class="match-stat-away {% if away_chances > home_chances %}match-stat-best{% elif away_chances < home_chances %}match-stat-worst{% endif %}">{{ away_chances }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if m.stats.goalscorers %}
+                <div class="match-modal-section">
+                    <h4>Mål</h4>
+                    {% set home_goals = m.stats.goalscorers | selectattr('team', 'equalto', m.home_team) | sort(attribute='minute') | list %}
+                    {% set away_goals = m.stats.goalscorers | selectattr('team', 'equalto', m.away_team) | sort(attribute='minute') | list %}
+                    <div class="match-modal-goals">
+                        <div class="match-modal-goal-col">
+                            <p class="match-modal-goal-col-title">{{ m.home_team }}</p>
+                            {% if home_goals %}
+                            <ul class="match-modal-list">
+                                {%- for g in home_goals %}
+                                {%- set ns = namespace(assist=None) %}
+                                {%- for a in m.stats.assists %}
+                                    {%- if a.team == g.team and a.minute == g.minute %}
+                                        {%- set ns.assist = a.name %}
+                                    {%- endif %}
+                                {%- endfor %}
+                                <li>{{ g.name }}{% if ns.assist %} ({{ ns.assist }}){% endif %} <span class="match-modal-minute">{{ g.minute }}'</span></li>
+                                {%- endfor %}
+                            </ul>
+                            {% else %}
+                            <span class="match-modal-no-goal">–</span>
+                            {% endif %}
+                        </div>
+                        <div class="match-modal-goal-col">
+                            <p class="match-modal-goal-col-title">{{ m.away_team }}</p>
+                            {% if away_goals %}
+                            <ul class="match-modal-list">
+                                {%- for g in away_goals %}
+                                {%- set ns = namespace(assist=None) %}
+                                {%- for a in m.stats.assists %}
+                                    {%- if a.team == g.team and a.minute == g.minute %}
+                                        {%- set ns.assist = a.name %}
+                                    {%- endif %}
+                                {%- endfor %}
+                                <li>{{ g.name }}{% if ns.assist %} ({{ ns.assist }}){% endif %} <span class="match-modal-minute">{{ g.minute }}'</span></li>
+                                {%- endfor %}
+                            </ul>
+                            {% else %}
+                            <span class="match-modal-no-goal">–</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
     <footer class="site-footer">
         <div class="container">
             <p><a href="https://github.com/matsest/rykker-godset-opp/actions/workflows/update-site.yml" target="_blank" rel="noopener">Sist oppdatert: {{ generated_at }}</a> · Data fra <a href="https://www.nifs.no/" target="_blank" rel="noopener">NIFS</a></p>
@@ -651,14 +788,36 @@
             });
         });
 
+        // Match detail modals
+        document.querySelectorAll('.match-btn').forEach(function(openBtn) {
+            var modalId = openBtn.getAttribute('aria-controls');
+            var modal = document.getElementById(modalId);
+            if (!modal) return;
+            var closeBtns = modal.querySelectorAll('[data-close-modal]');
+            function doOpen() {
+                modal.hidden = false;
+                document.body.style.overflow = 'hidden';
+                var closeBtn = modal.querySelector('.modal-close');
+                if (closeBtn) closeBtn.focus();
+            }
+            function doClose() {
+                modal.hidden = true;
+                document.body.style.overflow = '';
+                openBtn.focus();
+            }
+            openBtn.addEventListener('click', doOpen);
+            closeBtns.forEach(function(btn) {
+                btn.addEventListener('click', doClose);
+            });
+        });
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 var openModal = document.querySelector('.modal:not([hidden])');
                 if (openModal) {
                     openModal.hidden = true;
                     document.body.style.overflow = '';
-                    var btnId = openModal.id.replace('modal-', 'rank-btn-');
-                    var btn = document.getElementById(btnId);
+                    var btn = document.querySelector('[aria-controls="' + openModal.id + '"]');
                     if (btn) btn.focus();
                 }
             }

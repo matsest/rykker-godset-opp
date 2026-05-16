@@ -595,27 +595,58 @@ def main():
             result = parse_match_result(m, TEAM_NAME)
             is_home = home == TEAM_NAME
             score = None
+            home_score = None
+            away_score = None
             goals_for = None
             goals_against = None
             if result is not None:
-                score = f"{m['result']['homeScore90']}-{m['result']['awayScore90']}"
+                home_score = m["result"]["homeScore90"]
+                away_score = m["result"]["awayScore90"]
+                score = f"{home_score}-{away_score}"
                 if is_home:
-                    goals_for = m["result"]["homeScore90"]
-                    goals_against = m["result"]["awayScore90"]
+                    goals_for = home_score
+                    goals_against = away_score
                 else:
-                    goals_for = m["result"]["awayScore90"]
-                    goals_against = m["result"]["homeScore90"]
-            team_matches.append({
+                    goals_for = away_score
+                    goals_against = home_score
+            match_entry = {
+                "match_id": str(m.get("id", "")),
                 "date": m["timestamp"],
                 "home_team": home,
                 "away_team": away,
                 "is_home": is_home,
                 "result": result,
                 "score": score,
+                "home_score": home_score,
+                "away_score": away_score,
                 "goals_for": goals_for,
                 "goals_against": goals_against,
                 "round": m["round"],
-            })
+            }
+
+            # Attach per-match stats if available
+            if match_entry["match_id"] and match_entry["match_id"] in match_stats:
+                stats_data = match_stats[match_entry["match_id"]]
+                team_key = "home_stats" if is_home else "away_stats"
+                opp_key = "away_stats" if is_home else "home_stats"
+                team_raw = stats_data.get(team_key, {})
+                opp_raw = stats_data.get(opp_key, {})
+                match_entry["stats"] = {
+                    "possession": team_raw.get("possession"),
+                    "total_shots": team_raw.get("totalShots"),
+                    "shots_on_goal": team_raw.get("shotsOnGoal"),
+                    "shots_off_target": team_raw.get("shotsOffTarget"),
+                    "chances": team_raw.get("chances"),
+                    "opponent_possession": opp_raw.get("possession"),
+                    "opponent_total_shots": opp_raw.get("totalShots"),
+                    "opponent_shots_on_goal": opp_raw.get("shotsOnGoal"),
+                    "opponent_shots_off_target": opp_raw.get("shotsOffTarget"),
+                    "opponent_chances": opp_raw.get("chances"),
+                    "goalscorers": stats_data.get("goalscorers", []),
+                    "assists": stats_data.get("assists", []),
+                }
+
+            team_matches.append(match_entry)
 
     # Sort by timestamp
     team_matches.sort(key=lambda m: m["date"])
