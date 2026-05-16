@@ -2,7 +2,7 @@
 <html lang="nb">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Rykker Godset Opp? – Følg Strømsgodsets vei tilbake til Eliteserien</title>
     <meta name="description" content="Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.">
     <meta name="keywords" content="Strømsgodset, Godset, OBOS-ligaen, opprykk, Eliteserien, tabell, fotball, 2026">
@@ -786,6 +786,14 @@
             closeBtns.forEach(function(btn) {
                 btn.addEventListener('click', doClose);
             });
+            var modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 480) {
+                        doClose();
+                    }
+                });
+            }
         });
 
         // Match detail modals
@@ -809,6 +817,14 @@
             closeBtns.forEach(function(btn) {
                 btn.addEventListener('click', doClose);
             });
+            var modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 480) {
+                        doClose();
+                    }
+                });
+            }
         });
 
         document.addEventListener('keydown', function(e) {
