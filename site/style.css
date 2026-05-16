@@ -642,6 +642,7 @@ body {
 .match-date {
     color: var(--gray-600);
     font-size: 0.8rem;
+    white-space: nowrap;
 }
 
 .match-teams {
@@ -1156,7 +1157,7 @@ button.match-row.match-btn:focus-visible {
 
 @media (max-width: 480px) {
     button.match-row.match-btn {
-        grid-template-columns: 4rem 1fr auto;
+        grid-template-columns: auto 1fr auto;
     }
 }
 
@@ -1398,7 +1399,7 @@ button.match-row.match-btn:focus-visible {
     }
 
     .match-row {
-        grid-template-columns: 4rem 1fr auto;
+        grid-template-columns: auto 1fr auto;
     }
 
     .match-result {
