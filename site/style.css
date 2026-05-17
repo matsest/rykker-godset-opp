@@ -1044,6 +1044,19 @@ body {
     margin: 0;
 }
 
+.modal-title-group {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-tooltip {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-top: 0.25rem;
+    font-style: italic;
+    line-height: 1.4;
+}
+
 .modal-close {
     background: none;
     border: none;
