@@ -87,6 +87,14 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+}
+
+.nav-sentinel {
+    height: 0;
+    width: 100%;
+}
+
+.site-nav.is-stuck {
     padding-top: env(safe-area-inset-top);
 }
 

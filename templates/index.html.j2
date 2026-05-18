@@ -63,6 +63,7 @@
         </div>
     </header>
 
+    <div class="nav-sentinel" aria-hidden="true"></div>
     <nav class="site-nav" aria-label="Seksjoner">
         <div class="nav-inner">
             <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" type="button">
@@ -670,6 +671,22 @@
                     menu.classList.remove('is-open');
                 });
             });
+        }
+
+        // Add safe-area padding to sticky nav using Intersection Observer (smooth, no scroll jank)
+        var nav = document.querySelector('.site-nav');
+        var sentinel = document.querySelector('.nav-sentinel');
+        if (nav && sentinel) {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.intersectionRatio === 0) {
+                        nav.classList.add('is-stuck');
+                    } else {
+                        nav.classList.remove('is-stuck');
+                    }
+                });
+            }, { threshold: [0] });
+            observer.observe(sentinel);
         }
 
         // Copy link button
