@@ -4,6 +4,7 @@
 import json
 import os
 import sys
+from datetime import datetime, timezone
 
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), "..")
 RAW_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
@@ -197,9 +198,62 @@ def validate_stats():
             error(f"'{key}' is not a list")
 
 
+def _is_recent(date_str: str, max_days: int = 7) -> bool:
+    """Check if a date string is within the last `max_days` days."""
+    try:
+        d = datetime.fromisoformat(date_str)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - d).days <= max_days
+    except (ValueError, TypeError):
+        return False
+
+
+def validate_match_stats_content():
+    """Check that match stats have complete goalscorer data."""
+    print("Validating match stats content...", file=sys.stderr)
+
+    matches = load_json(os.path.join(RAW_DIR, "matches.json"))
+    match_dates = {str(m.get("id")): m.get("timestamp", "") for m in (matches if isinstance(matches, list) else [])}
+
+    match_stats = load_json(os.path.join(RAW_DIR, "match_stats.json"))
+    if not isinstance(match_stats, dict):
+        warn("match_stats.json not available for content validation")
+        return
+
+    recent_bad = 0
+    stale_bad = 0
+    for match_id, stats in match_stats.items():
+        home_goals = stats.get("home_goals", 0) or 0
+        away_goals = stats.get("away_goals", 0) or 0
+        total_goals = home_goals + away_goals
+        goalscorers = stats.get("goalscorers", [])
+        if total_goals > 0 and len(goalscorers) < total_goals:
+            home = stats.get("home_team", "?")
+            away = stats.get("away_team", "?")
+            date = match_dates.get(match_id, "")[:10]
+            msg = f"Match {match_id} ({home} vs {away}, {date}): {total_goals} goals but {len(goalscorers)} goalscorer entries"
+            if _is_recent(match_dates.get(match_id, "")):
+                recent_bad += 1
+                if recent_bad <= 5:
+                    error(msg)
+            else:
+                stale_bad += 1
+                if stale_bad <= 3:
+                    warn(msg)
+
+    if recent_bad:
+        error(f"{recent_bad} recent match(es) have incomplete goalscorer data")
+    if stale_bad:
+        warn(f"{stale_bad} older match(es) have incomplete goalscorer data (likely final — no re-fetch attempted)")
+    if not recent_bad and not stale_bad:
+        print("  -> all goalscorer data looks complete", file=sys.stderr)
+
+
 def main():
     print("Running CI data validation...", file=sys.stderr)
     validate_raw()
+    validate_match_stats_content()
     validate_stats()
 
     if warnings:

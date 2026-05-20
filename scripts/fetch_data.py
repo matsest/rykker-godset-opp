@@ -76,18 +76,19 @@ def extract_match_stats(match_detail: dict) -> dict:
     def pick(stats):
         return {k: stats.get(k) for k in MATCH_STAT_KEYS if stats.get(k) is not None}
 
-    # Extract goalscorers (typeId 2 = goal) and assists (typeId 5 = assist)
+    # Extract goalscorers (typeId 2 = goal, typeId 8 = own goal) and assists (typeId 5 = assist)
     goalscorers = []
     assists = []
     for event in match_detail.get("matchEvents", []):
         event_type = event.get("matchEventTypeId")
         person = event.get("person") or {}
         team = event.get("team") or {}
-        if event_type == 2:
+        if event_type in (2, 8):
             goalscorers.append({
                 "name": person.get("name"),
                 "team": team.get("name"),
                 "minute": event.get("time"),
+                "own_goal": event_type == 8,
             })
         elif event_type == 5:
             assists.append({
@@ -105,13 +106,42 @@ def extract_match_stats(match_detail: dict) -> dict:
         "away_goals": away_goals,
         "goalscorers": goalscorers,
         "assists": assists,
+        "_schema_version": 1,
     }
+
+
+def _has_incomplete_goalscorers(entry: dict) -> bool:
+    """Check if goals were scored but goalscorer list is incomplete."""
+    home_goals = entry.get("home_goals", 0) or 0
+    away_goals = entry.get("away_goals", 0) or 0
+    total_goals = home_goals + away_goals
+    if total_goals == 0:
+        return False
+    goalscorers = entry.get("goalscorers", [])
+    return len(goalscorers) < total_goals
+
+
+def _is_recent(date_str: str, max_days: int = 7) -> bool:
+    """Check if a date string is within the last `max_days` days."""
+    try:
+        d = datetime.fromisoformat(date_str)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - d).days <= max_days
+    except (ValueError, TypeError):
+        return False
+
+
+def _is_old_format(entry: dict) -> bool:
+    """Check if cached entry was created by old code (missing _schema_version)."""
+    return entry.get("_schema_version", 0) < 1
 
 
 def fetch_match_stats_incremental(matches_data: list, cache: dict) -> dict:
     """Fetch match-level stats only for matches not already in cache."""
     updated_cache = dict(cache)
     completed_ids = []
+    match_dates: dict[str, str] = {}
 
     for m in matches_data:
         match_id = str(m.get("id"))
@@ -119,12 +149,29 @@ def fetch_match_stats_incremental(matches_data: list, cache: dict) -> dict:
         if result.get("homeScore90") is None or result.get("awayScore90") is None:
             continue
         completed_ids.append(match_id)
+        match_dates[match_id] = m.get("timestamp", "")
 
     cached_ids = set(updated_cache.keys())
     missing_ids = [
         mid for mid in completed_ids
-        if mid not in cached_ids or "assists" not in updated_cache.get(mid, {})
+        if mid not in cached_ids
+        or "assists" not in updated_cache.get(mid, {})
+        or _is_old_format(updated_cache.get(mid, {}))
+        or (
+            _has_incomplete_goalscorers(updated_cache.get(mid, {}))
+            and _is_recent(match_dates.get(mid, ""))
+        )
     ]
+
+    stale_incomplete = len([
+        mid for mid in completed_ids
+        if mid in cached_ids
+        and not _is_old_format(updated_cache.get(mid, {}))
+        and _has_incomplete_goalscorers(updated_cache.get(mid, {}))
+        and not _is_recent(match_dates.get(mid, ""))
+    ])
+    if stale_incomplete:
+        print(f"  ({stale_incomplete} older incomplete matches skipped — data likely final)", file=sys.stderr)
 
     print(f"Match stats: {len(completed_ids)} completed, {len(cached_ids)} cached, {len(missing_ids)} to fetch", file=sys.stderr)
 
