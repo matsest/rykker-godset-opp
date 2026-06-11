@@ -543,7 +543,9 @@ def get_team_rank(team_name: str, rankings: dict, field: str) -> tuple | None:
 
 
 def compare_to_table(rank: int, table_position: int) -> str:
-    """Return whether a stat rank is better, worse, or equal vs table position."""
+    """Return whether a stat rank is better, worse, equal, or top vs table position."""
+    if rank == 1 and table_position == 1:
+        return "top"
     if rank < table_position:
         return "better"
     elif rank > table_position:
@@ -891,7 +893,7 @@ def main():
         for category_key, category in team_ranks.items():
             print(f"  {category['label']}:", file=sys.stderr)
             for field, info in category["stats"].items():
-                indicator = "↑" if info["vs_table"] == "better" else "↓" if info["vs_table"] == "worse" else "→"
+                indicator = "★" if info["vs_table"] == "top" else "↑" if info["vs_table"] == "better" else "↓" if info["vs_table"] == "worse" else "→"
                 print(f"    {info['label']}: {info['display_value']} ({info['display_rank']}) {indicator}", file=sys.stderr)
 
 

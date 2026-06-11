@@ -445,6 +445,10 @@ body {
     color: var(--gray-600);
 }
 
+.ind-top {
+    color: var(--win);
+}
+
 /* Tiered intensity for ligastatistikk cards (background tint + arrow size only) */
 .stat-positive.tier-2 { background: rgba(40, 167, 69, 0.04); }
 .stat-positive.tier-3 { background: rgba(40, 167, 69, 0.08); }

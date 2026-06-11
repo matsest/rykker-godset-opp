@@ -220,7 +220,7 @@
                 <h3 class="stats-category-title">{{ category.label }}</h3>
                 <div class="stats-grid">
                     {% for key, rank in category.stats.items() %}
-                    <div class="stat-card {% if rank.vs_table == 'better' %}stat-positive{% elif rank.vs_table == 'worse' %}stat-negative{% else %}stat-neutral{% endif %} tier-{{ rank.vs_table_tier|default(0) }}">
+                    <div class="stat-card {% if rank.vs_table == 'top' %}stat-positive{% elif rank.vs_table == 'better' %}stat-positive{% elif rank.vs_table == 'worse' %}stat-negative{% else %}stat-neutral{% endif %} tier-{{ rank.vs_table_tier|default(0) }}">
                         <span class="stat-value">{{ rank.display_value }}</span>
                         <span class="stat-label">
                             {{ rank.label }}
@@ -237,7 +237,7 @@
                         {% endif %}
                             {{ rank.display_rank }}
                             <span class="rank-indicator ind-{{ rank.vs_table }} tier-{{ rank.vs_table_tier|default(0) }}">
-                                {% if rank.vs_table == 'better' %}{% if rank.vs_table_tier|default(0) >= 3 %}▲▲{% else %}▲{% endif %}{% elif rank.vs_table == 'worse' %}{% if rank.vs_table_tier|default(0) >= 3 %}▼▼{% else %}▼{% endif %}{% else %}▶{% endif %}
+                                {% if rank.vs_table == 'top' %}★{% elif rank.vs_table == 'better' %}{% if rank.vs_table_tier|default(0) >= 3 %}▲▲{% else %}▲{% endif %}{% elif rank.vs_table == 'worse' %}{% if rank.vs_table_tier|default(0) >= 3 %}▼▼{% else %}▼{% endif %}{% else %}▶{% endif %}
                             </span>
                         {% if rank.full_table %}
                         </button>
