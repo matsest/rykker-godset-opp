@@ -108,6 +108,18 @@ body {
     position: relative;
 }
 
+.nav-brand {
+    display: none;
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    margin-right: 0.5rem;
+}
+
 .nav-toggle {
     display: none;
     background: none;
@@ -156,6 +168,10 @@ body {
 }
 
 @media (max-width: 640px) {
+    .site-nav.is-stuck .nav-brand {
+        display: block;
+    }
+
     .nav-toggle {
         display: flex;
         align-items: center;
