@@ -673,6 +673,17 @@
                     menu.classList.remove('is-open');
                 });
             });
+
+            var brand = document.querySelector('.nav-brand');
+            if (brand) {
+                brand.addEventListener('click', function() {
+                    toggle.setAttribute('aria-expanded', 'false');
+                    menu.classList.remove('is-open');
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                });
+            }
         }
 
         // Add safe-area padding to sticky nav using Intersection Observer (smooth, no scroll jank)
