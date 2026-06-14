@@ -803,6 +803,44 @@ body {
     color: var(--godset-blue);
 }
 
+/* Sortable table headers */
+.league-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.league-table th.sortable:hover {
+    background: var(--godset-blue-light);
+}
+
+.league-table th.sortable::after {
+    content: "";
+    display: inline-block;
+    margin-left: 0.375rem;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid rgba(255,255,255,0.4);
+    border-bottom: none;
+    vertical-align: middle;
+}
+
+.league-table th.sortable.active-sort::after {
+    border-top-color: rgba(255,255,255,0.85);
+}
+
+.league-table th.sortable.active-sort.desc::after {
+    border-top: 7px solid #fff;
+    border-bottom: none;
+}
+
+.league-table th.sortable.active-sort.asc::after {
+    border-top: none;
+    border-bottom: 7px solid #fff;
+}
+
 /* Table row zone backgrounds */
 .league-table tbody tr.promotion {
     background: rgba(40, 167, 69, 0.08);

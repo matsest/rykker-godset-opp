@@ -347,14 +347,14 @@
                         <tr>
                             <th>#</th>
                             <th>Spiller</th>
-                            <th><span class="hide-mobile">Mål</span><span class="show-mobile">M</span></th>
-                            <th><span class="hide-mobile">Assists</span><span class="show-mobile">A</span></th>
-                            <th><span class="hide-mobile">Målpoeng</span><span class="show-mobile">MP</span></th>
+                            <th class="sortable" data-sort="goals" data-sort-default="desc" aria-label="Sorter etter mål"><span class="hide-mobile">Mål</span><span class="show-mobile">M</span></th>
+                            <th class="sortable" data-sort="assists" data-sort-default="desc" aria-label="Sorter etter assists"><span class="hide-mobile">Assists</span><span class="show-mobile">A</span></th>
+                            <th class="sortable active-sort desc" data-sort="points" data-sort-default="desc" aria-label="Sorter etter målpoeng"><span class="hide-mobile">Målpoeng</span><span class="show-mobile">MP</span></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for s in top_scorers %}
-                        <tr>
+                        <tr data-goals="{{ s.goals }}" data-assists="{{ s.assists }}" data-points="{{ s.points }}">
                             <td class="pos">{{ loop.index }}</td>
                             <td class="team">{{ s.name }}</td>
                             <td>{{ s.goals }}</td>
@@ -804,6 +804,43 @@
                 });
             }
         });
+
+        // Topscorer table sorting
+        var topscorerTable = document.querySelector('.topscorer-table');
+        if (topscorerTable) {
+            var tbody = topscorerTable.querySelector('tbody');
+            var headers = topscorerTable.querySelectorAll('th.sortable');
+            headers.forEach(function(th) {
+                th.addEventListener('click', function() {
+                    var key = th.getAttribute('data-sort');
+                    var defaultDir = th.getAttribute('data-sort-default') || 'desc';
+                    var isActive = th.classList.contains('active-sort');
+                    var currentDir = isActive ? (th.classList.contains('asc') ? 'asc' : 'desc') : defaultDir;
+                    var newDir = isActive ? (currentDir === 'asc' ? 'desc' : 'asc') : currentDir;
+
+                    headers.forEach(function(h) {
+                        h.classList.remove('active-sort', 'asc', 'desc');
+                    });
+                    th.classList.add('active-sort', newDir);
+
+                    var rows = Array.from(tbody.querySelectorAll('tr'));
+                    rows.sort(function(a, b) {
+                        var aVal = parseInt(a.getAttribute('data-' + key), 10) || 0;
+                        var bVal = parseInt(b.getAttribute('data-' + key), 10) || 0;
+                        if (aVal === bVal) {
+                            aVal = a.getAttribute('data-points');
+                            bVal = b.getAttribute('data-points');
+                        }
+                        return newDir === 'asc' ? aVal - bVal : bVal - aVal;
+                    });
+
+                    rows.forEach(function(row, index) {
+                        row.querySelector('td.pos').textContent = index + 1;
+                        tbody.appendChild(row);
+                    });
+                });
+            });
+        }
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
