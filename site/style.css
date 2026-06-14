@@ -860,13 +860,16 @@ body {
 @media (max-width: 480px) {
     .league-table th.sortable {
         position: relative;
+        vertical-align: top;
+        padding-bottom: 1rem;
     }
 
     .league-table th.sortable::after {
         position: absolute;
-        right: 0;
-        top: 50%;
-        margin-top: 2px;
+        left: 50%;
+        bottom: 6px;
+        transform: translateX(-50%);
+        margin-top: 0;
         margin-left: 0;
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
@@ -882,7 +885,6 @@ body {
     .league-table th.sortable.active-sort.asc::after {
         border-top: none;
         border-bottom: 5px solid #fff;
-        margin-top: -2px;
     }
 }
 
