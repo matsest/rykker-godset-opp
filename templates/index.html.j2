@@ -300,6 +300,7 @@
         {# Last Matches #}
         <section class="section" id="siste-resultater">
             <h2 class="section-title"><a href="#siste-resultater">Siste resultater</a></h2>
+            <p class="section-intro">Trykk på en kamp for å se statistikk og detaljer fra kampen.</p>
             <div class="matches-list">
                 {% for m in last_matches %}
                 <button type="button" class="match-row match-{{ m.result|lower }} match-btn" aria-haspopup="dialog" aria-controls="modal-match-{{ loop.index }}">
