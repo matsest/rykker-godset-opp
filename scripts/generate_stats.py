@@ -35,11 +35,11 @@ def determine_status(position: int) -> tuple[str, str]:
 def gauge_percent(position: int) -> int:
     """Map table position to a 0-100 gauge percentage."""
     if position <= 2:  # Ja!
-        return 75 + (2 - position) * 10
+        return 95 - (position - 1) * 15
     elif position <= 6:  # Tja
-        return 35 + (6 - position) * 8
+        return 65 - (position - 3) * 8
     else:  # Nei
-        return max(5, 30 - (position - 7) * 2)
+        return max(5, 30 - (position - 7) * 3)
 
 
 def parse_match_result(match: dict, team_name: str) -> str | None:
