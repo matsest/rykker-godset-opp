@@ -447,9 +447,14 @@ def calculate_goal_timing(match_stats: dict) -> dict:
             "percent": percent,
         })
 
+    first_half = sum(counts[:3])
+    second_half = sum(counts[3:])
+
     return {
         "intervals": result,
         "total": total,
+        "first_half": first_half,
+        "second_half": second_half,
     }
 
 
