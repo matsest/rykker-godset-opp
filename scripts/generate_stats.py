@@ -4,7 +4,7 @@
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 MONTHS_NO = [
@@ -630,6 +630,19 @@ def main():
                 "goals_against": goals_against,
                 "round": m["round"],
             }
+
+            # Convert timestamp to local time (Europe/Oslo)
+            ts = m.get("timestamp")
+            if ts:
+                dt = datetime.fromisoformat(ts)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                dt_oslo = dt.astimezone(ZoneInfo("Europe/Oslo"))
+                match_entry["date_display"] = f"{dt_oslo.day}. {MONTHS_NO[dt_oslo.month - 1]}"
+                match_entry["time_display"] = dt_oslo.strftime("%H:%M")
+            else:
+                match_entry["date_display"] = ""
+                match_entry["time_display"] = ""
 
             # Attach per-match stats if available
             if match_entry["match_id"] and match_entry["match_id"] in match_stats:

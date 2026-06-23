@@ -305,7 +305,7 @@
             <div class="matches-list">
                 {% for m in last_matches %}
                 <button type="button" class="match-row match-{{ m.result|lower }} match-btn" aria-haspopup="dialog" aria-controls="modal-match-{{ loop.index }}">
-                    <span class="match-date">{{ m.date[:10] }}</span>
+                    <span class="match-date">{{ m.date[:10] }}<br>kl. {{ m.time_display }}</span>
                     <span class="match-teams">
                         {% if m.is_home %}{{ m.away_team }}{% else %}{{ m.home_team }}{% endif %}
                         <span class="match-venue">{% if m.is_home %}(Hjemme){% else %}(Borte){% endif %}</span>
@@ -326,7 +326,7 @@
             <div class="matches-list">
                 {% for m in upcoming_matches %}
                 <div class="match-row match-upcoming">
-                    <span class="match-date">{{ m.date[:10] }}</span>
+                    <span class="match-date">{{ m.date[:10] }}<br>kl. {{ m.time_display }}</span>
                     <span class="match-teams">
                         {% if m.is_home %}{{ m.away_team }}{% else %}{{ m.home_team }}{% endif %}
                         <span class="match-venue">{% if m.is_home %}(Hjemme){% else %}(Borte){% endif %}</span>
