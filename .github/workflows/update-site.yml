@@ -47,7 +47,7 @@ jobs:
         run: uv sync
 
       - name: Cache NIFS data
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: data/raw/
           key: nifs-data-${{ github.run_id }}
