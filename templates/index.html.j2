@@ -275,12 +275,12 @@
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if team.goal_difference_last_5 > 0 %}stat-positive{% elif team.goal_difference_last_5 == 0 %}stat-warning{% else %}stat-negative{% endif %}">
+                <div class="stat-card {% if team.goal_difference_last_5 >= 5 %}stat-positive{% elif team.goal_difference_last_5 >= 0 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{% if team.goal_difference_last_5 > 0 %}+{% endif %}{{ team.goal_difference_last_5|default(0, true) }}</span>
                     <span class="stat-label">
                         Målforskjell
                         <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: Positiv, Gul: Null, Rød: Negativ</span>
+                            <span class="tooltip-text">Grønn: +1 per kamp, Gul: 0-4 per kamp, Rød: negativ</span>
                         </span>
                     </span>
                 </div>
