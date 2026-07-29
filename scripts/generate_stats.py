@@ -75,8 +75,8 @@ def load_match_stats() -> dict:
     return {}
 
 
-def calculate_last_5_points(matches_data: list) -> dict[str, int]:
-    """Calculate points from last 5 completed matches for every team."""
+def calculate_last_5_points(matches_data: list) -> dict[str, dict]:
+    """Calculate points and average from last 5 completed matches for every team."""
     team_matches: dict[str, list[dict]] = {}
     for m in matches_data:
         result = m.get("result", {})
@@ -100,15 +100,30 @@ def calculate_last_5_points(matches_data: list) -> dict[str, int]:
             else:
                 points = 3 if away_score > home_score else 0
 
-            team_matches[team].append({"timestamp": timestamp, "points": points})
+            goals_for = home_score if is_home else away_score
+            goals_against = away_score if is_home else home_score
 
-    last_5_points = {}
+            team_matches[team].append({
+                "timestamp": timestamp,
+                "points": points,
+                "goals_for": goals_for,
+                "goals_against": goals_against,
+            })
+
+    last_5_stats = {}
     for team, matches in team_matches.items():
         matches.sort(key=lambda x: x["timestamp"])
         last_5 = matches[-5:] if len(matches) >= 5 else matches
-        last_5_points[team] = sum(m["points"] for m in last_5)
+        total_points = sum(m["points"] for m in last_5)
+        goals_for = sum(m["goals_for"] for m in last_5)
+        goals_against = sum(m["goals_against"] for m in last_5)
+        last_5_stats[team] = {
+            "points": total_points,
+            "avg": round(total_points / len(last_5), 2) if last_5 else 0.0,
+            "goal_difference": goals_for - goals_against,
+        }
 
-    return last_5_points
+    return last_5_stats
 
 
 def calculate_last_5_form(matches_data: list) -> dict[str, list[str]]:
@@ -260,10 +275,12 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             teams[name]["away_avg"] = avgs["away_avg"]
 
     # Points from last 5 matches
-    last_5_points = calculate_last_5_points(matches_data)
-    for name, points in last_5_points.items():
+    last_5_stats = calculate_last_5_points(matches_data)
+    for name, form_stats in last_5_stats.items():
         if name in teams:
-            teams[name]["points_last_5"] = points
+            teams[name]["points_last_5"] = form_stats["points"]
+            teams[name]["points_avg_last_5"] = form_stats["avg"]
+            teams[name]["goal_difference_last_5"] = form_stats["goal_difference"]
 
     # Aggregate from match stats cache
     for match_id, data in match_stats.items():
@@ -353,6 +370,8 @@ def aggregate_team_stats(match_stats: dict, table_rows: list, matches_data: list
             "accuracy": accuracy,
             "chance_conversion": chance_conversion,
             "points_last_5": t.get("points_last_5", 0),
+            "points_avg_last_5": t.get("points_avg_last_5", 0.0),
+            "goal_difference_last_5": t.get("goal_difference_last_5", 0),
             "clean_sheets": t["clean_sheets"],
             "low_conceded": t["low_conceded"],
             "high_conceded": t["high_conceded"],
@@ -534,6 +553,8 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
         ("home_avg", False),
         ("away_avg", False),
         ("points_last_5", False),
+        ("points_avg_last_5", False),
+        ("goal_difference_last_5", False),
         ("clean_sheets", False),
         ("low_conceded", False),
         ("high_conceded", True),
@@ -544,7 +565,7 @@ def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
 
     for field, ascending in categories:
         # Filter out teams with invalid values; allow negatives for goal_difference
-        if field == "goal_difference":
+        if field == "goal_difference" or field == "goal_difference_last_5":
             valid = [(t["name"], t[field]) for t in team_stats if t[field] is not None]
         else:
             valid = [(t["name"], t[field]) for t in team_stats if t[field] is not None and t[field] >= 0]
@@ -581,6 +602,42 @@ def compare_to_table(rank: int, table_position: int) -> str:
     elif rank > table_position:
         return "worse"
     return "equal"
+
+
+def build_form_stat_rank(
+    team_name: str,
+    field: str,
+    label: str,
+    rankings: dict,
+    position: int,
+    format_value=lambda v: str(v),
+) -> dict | None:
+    """Build rank info for a form-section stat card."""
+    rank_info = get_team_rank(team_name, rankings, field)
+    if not rank_info:
+        return None
+    value, rank, total = rank_info
+    comparison = compare_to_table(rank, position)
+    tier = min(abs(rank - position), 3)
+    return {
+        "label": label,
+        "value": value,
+        "rank": rank,
+        "total": total,
+        "display_value": format_value(value),
+        "display_rank": f"{rank}. av {total}",
+        "vs_table": comparison,
+        "vs_table_tier": tier,
+        "full_table": [
+            {
+                "rank": r,
+                "name": n,
+                "value": v,
+                "display_value": format_value(v),
+            }
+            for n, v, r in rankings.get(field, [])
+        ],
+    }
 
 
 def main():
@@ -854,6 +911,18 @@ def main():
             "stats": category_items,
         }
 
+    form_points_rank = build_form_stat_rank(
+        TEAM_NAME, "points_avg_last_5", "Poeng per kamp", rankings, position,
+    )
+    form_goal_difference_rank = build_form_stat_rank(
+        TEAM_NAME,
+        "goal_difference_last_5",
+        "Målforskjell",
+        rankings,
+        position,
+        format_value=lambda v: f"{'+' if v > 0 else ''}{v}",
+    )
+
     top_scorers = calculate_top_scorers(match_stats)
     goal_timing = calculate_goal_timing(match_stats)
 
@@ -916,6 +985,8 @@ def main():
                 "points_to_6th": points_to_6th,
             },
             "ranks": team_ranks,
+            "form_points_rank": form_points_rank,
+            "form_goal_difference_rank": form_goal_difference_rank,
             "goal_timing": goal_timing,
         },
         "last_matches": last_5,

@@ -115,6 +115,7 @@ def validate_stats():
         "goals_for", "goals_against", "goal_difference", "points", "points_per_game",
         "form_last_5", "points_last_5", "points_avg_last_5",
         "won_last_5", "drawn_last_5", "lost_last_5", "goal_difference_last_5",
+        "form_points_rank", "form_goal_difference_rank",
         "home", "away", "promotion", "ranks", "goal_timing",
     ]
     for key in team_required:
@@ -152,6 +153,24 @@ def validate_stats():
                     error(f"team.ranks.{cat} has invalid structure")
     else:
         error("team.ranks is missing or not a dict")
+
+    form_points_rank = team.get("form_points_rank")
+    if form_points_rank is not None:
+        if not isinstance(form_points_rank, dict):
+            error("team.form_points_rank is not a dict")
+        else:
+            for key in ["label", "display_rank", "vs_table", "full_table"]:
+                if key not in form_points_rank:
+                    error(f"team.form_points_rank missing key: '{key}'")
+
+    form_goal_difference_rank = team.get("form_goal_difference_rank")
+    if form_goal_difference_rank is not None:
+        if not isinstance(form_goal_difference_rank, dict):
+            error("team.form_goal_difference_rank is not a dict")
+        else:
+            for key in ["label", "display_rank", "vs_table", "full_table"]:
+                if key not in form_goal_difference_rank:
+                    error(f"team.form_goal_difference_rank missing key: '{key}'")
 
     # Sanity checks
     position = team.get("position")

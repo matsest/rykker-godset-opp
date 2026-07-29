@@ -266,23 +266,39 @@
                         </span>
                     </span>
                 </div>
-                <div class="stat-card {% if team.points_avg_last_5 >= 1.93 %}stat-positive{% elif team.points_avg_last_5 >= 1.53 %}stat-warning{% else %}stat-negative{% endif %}">
+                <div class="stat-card {% if team.form_points_rank %}{% if team.form_points_rank.vs_table == 'top' %}stat-positive{% elif team.form_points_rank.vs_table == 'better' %}stat-positive{% elif team.form_points_rank.vs_table == 'worse' %}stat-negative{% else %}stat-neutral{% endif %} tier-{{ team.form_points_rank.vs_table_tier|default(0) }}{% elif team.points_avg_last_5 >= 1.93 %}stat-positive{% elif team.points_avg_last_5 >= 1.53 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{{ team.points_avg_last_5 }}</span>
                     <span class="stat-label">
                         Poeng per kamp
-                        <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: ≥1,93, Gul: ≥1,53, Rød: &lt;1,53</span>
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er poeng per kamp?">&#9432;
+                            <span class="tooltip-text">Snitt poeng per kamp i de siste 5 kampene – høyere er bedre</span>
                         </span>
                     </span>
+                    {% if team.form_points_rank %}
+                    <button type="button" class="stat-rank rank-btn" id="rank-btn-form-points" aria-haspopup="dialog" aria-controls="modal-form-points">
+                        {{ team.form_points_rank.display_rank }}
+                        <span class="rank-indicator ind-{{ team.form_points_rank.vs_table }} tier-{{ team.form_points_rank.vs_table_tier|default(0) }}">
+                            {% if team.form_points_rank.vs_table == 'top' %}★{% elif team.form_points_rank.vs_table == 'better' %}{% if team.form_points_rank.vs_table_tier|default(0) >= 3 %}▲▲{% else %}▲{% endif %}{% elif team.form_points_rank.vs_table == 'worse' %}{% if team.form_points_rank.vs_table_tier|default(0) >= 3 %}▼▼{% else %}▼{% endif %}{% else %}▶{% endif %}
+                        </span>
+                    </button>
+                    {% endif %}
                 </div>
-                <div class="stat-card {% if team.goal_difference_last_5 >= 5 %}stat-positive{% elif team.goal_difference_last_5 >= 0 %}stat-warning{% else %}stat-negative{% endif %}">
+                <div class="stat-card {% if team.form_goal_difference_rank %}{% if team.form_goal_difference_rank.vs_table == 'top' %}stat-positive{% elif team.form_goal_difference_rank.vs_table == 'better' %}stat-positive{% elif team.form_goal_difference_rank.vs_table == 'worse' %}stat-negative{% else %}stat-neutral{% endif %} tier-{{ team.form_goal_difference_rank.vs_table_tier|default(0) }}{% elif team.goal_difference_last_5 >= 5 %}stat-positive{% elif team.goal_difference_last_5 >= 0 %}stat-warning{% else %}stat-negative{% endif %}">
                     <span class="stat-value">{% if team.goal_difference_last_5 > 0 %}+{% endif %}{{ team.goal_difference_last_5|default(0, true) }}</span>
                     <span class="stat-label">
                         Målforskjell
-                        <span class="tooltip-trigger" tabindex="0">&#9432;
-                            <span class="tooltip-text">Grønn: +1 per kamp, Gul: 0-4 per kamp, Rød: negativ</span>
+                        <span class="tooltip-trigger" tabindex="0" aria-label="Hva er målforskjell?">&#9432;
+                            <span class="tooltip-text">Mål scoret minus mål sluppet inn i de siste 5 kampene – høyere er bedre</span>
                         </span>
                     </span>
+                    {% if team.form_goal_difference_rank %}
+                    <button type="button" class="stat-rank rank-btn" id="rank-btn-form-goal-difference" aria-haspopup="dialog" aria-controls="modal-form-goal-difference">
+                        {{ team.form_goal_difference_rank.display_rank }}
+                        <span class="rank-indicator ind-{{ team.form_goal_difference_rank.vs_table }} tier-{{ team.form_goal_difference_rank.vs_table_tier|default(0) }}">
+                            {% if team.form_goal_difference_rank.vs_table == 'top' %}★{% elif team.form_goal_difference_rank.vs_table == 'better' %}{% if team.form_goal_difference_rank.vs_table_tier|default(0) >= 3 %}▲▲{% else %}▲{% endif %}{% elif team.form_goal_difference_rank.vs_table == 'worse' %}{% if team.form_goal_difference_rank.vs_table_tier|default(0) >= 3 %}▼▼{% else %}▼{% endif %}{% else %}▶{% endif %}
+                        </span>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-row">
@@ -297,6 +313,80 @@
             </div>
             <p class="form-points">{{ team.points_last_5 }} poeng av 15 mulige</p>
         </section>
+
+        {% if team.form_points_rank %}
+        <div class="modal" id="modal-form-points" role="dialog" aria-modal="true" aria-labelledby="modal-title-form-points" hidden>
+            <div class="modal-backdrop" data-close-modal></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title-group">
+                        <h3 id="modal-title-form-points">{{ team.form_points_rank.label }} – hele ligaen</h3>
+                        <p class="modal-tooltip">Snitt poeng per kamp i de siste 5 kampene – høyere er bedre</p>
+                    </div>
+                    <button class="modal-close" type="button" aria-label="Lukk" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-wrapper">
+                        <table class="league-table ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Lag</th>
+                                    <th>{{ team.form_points_rank.label }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in team.form_points_rank.full_table %}
+                                <tr class="{% if row.name == 'Strømsgodset' %}highlight{% endif %}">
+                                    <td class="pos">{{ row.rank }}</td>
+                                    <td class="team">{{ row.name }}</td>
+                                    <td class="points">{{ row.display_value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if team.form_goal_difference_rank %}
+        <div class="modal" id="modal-form-goal-difference" role="dialog" aria-modal="true" aria-labelledby="modal-title-form-goal-difference" hidden>
+            <div class="modal-backdrop" data-close-modal></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title-group">
+                        <h3 id="modal-title-form-goal-difference">{{ team.form_goal_difference_rank.label }} – hele ligaen</h3>
+                        <p class="modal-tooltip">Mål scoret minus mål sluppet inn i de siste 5 kampene – høyere er bedre</p>
+                    </div>
+                    <button class="modal-close" type="button" aria-label="Lukk" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-wrapper">
+                        <table class="league-table ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Lag</th>
+                                    <th>{{ team.form_goal_difference_rank.label }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in team.form_goal_difference_rank.full_table %}
+                                <tr class="{% if row.name == 'Strømsgodset' %}highlight{% endif %}">
+                                    <td class="pos">{{ row.rank }}</td>
+                                    <td class="team">{{ row.name }}</td>
+                                    <td class="points">{{ row.display_value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         {# Last Matches #}
         <section class="section" id="siste-resultater">
