@@ -111,6 +111,31 @@ def calculate_last_5_points(matches_data: list) -> dict[str, int]:
     return last_5_points
 
 
+def calculate_last_5_form(matches_data: list) -> dict[str, list[str]]:
+    """Return W/D/L results for last 5 completed matches per team."""
+    team_matches: dict[str, list[dict]] = {}
+    for m in matches_data:
+        home = m["homeTeam"]["name"]
+        away = m["awayTeam"]["name"]
+        timestamp = m["timestamp"]
+
+        for team in (home, away):
+            result = parse_match_result(m, team)
+            if result is None:
+                continue
+            if team not in team_matches:
+                team_matches[team] = []
+            team_matches[team].append({"timestamp": timestamp, "result": result})
+
+    last_5_form = {}
+    for team, matches in team_matches.items():
+        matches.sort(key=lambda x: x["timestamp"])
+        last_5 = matches[-5:] if len(matches) >= 5 else matches
+        last_5_form[team] = [m["result"] for m in last_5]
+
+    return last_5_form
+
+
 def calculate_defensive_distributions(matches_data: list) -> dict[str, dict]:
     """Calculate clean sheets and low-conceded matches per team."""
     team_stats: dict[str, dict] = {}
@@ -718,6 +743,7 @@ def main():
     next_5 = upcoming[:5]
 
     # Build full table for frontend
+    last_5_form = calculate_last_5_form(matches_data)
     full_table = []
     for row in table_rows:
         api_name = row["name"]
@@ -735,7 +761,7 @@ def main():
             "goals_against": row["goalsConceded"],
             "goal_difference": row["goalDifference"],
             "points": row["points"],
-            "form": row.get("lastSixMatches", "").split(",") if row.get("lastSixMatches") else [],
+            "form": last_5_form.get(api_name, []),
         })
 
     # Calculate first goal stats league-wide

@@ -417,6 +417,7 @@
                             <th>T</th>
                             <th class="hide-mobile">+/-</th>
                             <th class="hide-mobile">MF</th>
+                            <th class="hide-mobile">Form</th>
                             <th>P</th>
                         </tr>
                     </thead>
@@ -431,6 +432,13 @@
                             <td>{{ t.lost }}</td>
                             <td class="hide-mobile">{{ t.goals_for }}–{{ t.goals_against }}</td>
                             <td class="hide-mobile">{{ t.goal_difference }}</td>
+                            <td class="hide-mobile table-form-cell">
+                                <span class="table-form" aria-label="Form siste {{ t.form|length }} kamper">
+                                    {% for r in t.form %}
+                                    <span class="table-form-dot form-{{ r|lower }}" title="{% if r == 'W' %}Seier{% elif r == 'D' %}Uavgjort{% else %}Tap{% endif %}"></span>
+                                    {% endfor %}
+                                </span>
+                            </td>
                             <td class="points">{{ t.points }}</td>
                         </tr>
                         {% endfor %}

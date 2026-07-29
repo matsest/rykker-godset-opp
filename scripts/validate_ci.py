@@ -184,7 +184,7 @@ def validate_stats():
         if len(table) != EXPECTED_TEAMS:
             warn(f"table has {len(table)} rows, expected {EXPECTED_TEAMS}")
         for i, row in enumerate(table):
-            for key in ["position", "name", "short_name", "display_name", "played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_difference", "points"]:
+            for key in ["position", "name", "short_name", "display_name", "played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_difference", "points", "form"]:
                 if key not in row:
                     error(f"table row {i} missing key: '{key}'")
                     break

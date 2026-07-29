@@ -819,6 +819,37 @@ body {
     color: var(--godset-blue);
 }
 
+.league-table td.table-form-cell {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+
+.table-form {
+    display: inline-flex;
+    gap: 0.1875rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-form-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.table-form-dot.form-w {
+    background: var(--win);
+}
+
+.table-form-dot.form-d {
+    background: var(--draw);
+}
+
+.table-form-dot.form-l {
+    background: var(--loss);
+}
+
 /* Sortable table headers */
 .league-table th.sortable {
     cursor: pointer;
