@@ -1,0 +1,11 @@
+# robots.txt - Rykker Godset Opp?
+# Protocol: RFC 9309 (https://www.rfc-editor.org/rfc/rfc9309)
+# Content Signals: https://contentsignals.org/
+
+# General rule: allow all crawlers full access to the site
+User-agent: *
+Allow: /
+Content-Signal: ai-train=no, search=yes, ai-input=no
+
+# Reference the sitemap for discoverability
+Sitemap: https://godset.mats.codes/sitemap.xml

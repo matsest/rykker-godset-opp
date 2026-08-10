@@ -34,6 +34,7 @@ all: fetch stats build
 ci: all validate
 	@test -f site/index.html || (echo "ERROR: site/index.html not built" && exit 1)
 	@test -f site/style.css || (echo "ERROR: site/style.css not found" && exit 1)
+	@test -f site/robots.txt || (echo "ERROR: site/robots.txt not found" && exit 1)
 	@echo "CI check passed – site is ready for deploy"
 
 # Local preview

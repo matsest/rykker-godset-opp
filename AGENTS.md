@@ -65,6 +65,7 @@ Only run `make ci` when you want the full pipeline plus data-integrity checks. Y
 - `site/style.css` – Source stylesheet
 - `site/og-image.png` – Open Graph / Twitter card image (1200×630)
 - `site/favicon.svg` – Site favicon (football in Godset blue)
+- `site/robots.txt` – Crawler rules (RFC 9309), references `site/sitemap.xml`
 
 Source for the OG image is `assets/og-image.svg`. To regenerate:
 
