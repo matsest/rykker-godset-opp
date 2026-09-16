@@ -667,6 +667,75 @@ body {
 
 .match-upcoming {
     border-left: 4px solid var(--gray-300);
+    grid-template-columns: 5rem 1fr auto;
+}
+
+.match-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.375rem;
+}
+
+.match-meta .tooltip-trigger {
+    margin-left: 0;
+}
+
+.match-meta .tooltip-text {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+.match-meta .tooltip-text::after {
+    left: auto;
+    right: 1.5rem;
+    transform: none;
+}
+
+.tooltip-text.difficulty-tooltip {
+    text-align: left;
+    max-width: min(260px, 85vw);
+    line-height: 1.5;
+}
+
+/* Fixture Difficulty Rating badge: 1 (easiest) to 5 (hardest) */
+.difficulty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.difficulty-1 {
+    background: #28a745;
+    color: #fff;
+}
+
+.difficulty-2 {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.difficulty-3 {
+    background: #ffc107;
+    color: #212529;
+}
+
+.difficulty-4 {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.difficulty-5 {
+    background: #dc3545;
+    color: #fff;
 }
 
 .match-date {

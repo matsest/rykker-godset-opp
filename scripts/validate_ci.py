@@ -216,6 +216,22 @@ def validate_stats():
         if not isinstance(val, list):
             error(f"'{key}' is not a list")
 
+    # Fixture Difficulty Rating on upcoming matches
+    upcoming = stats.get("upcoming_matches")
+    if isinstance(upcoming, list):
+        for i, m in enumerate(upcoming):
+            if not isinstance(m, dict):
+                error(f"upcoming_matches row {i} is not a dict")
+                continue
+            for sub in ["difficulty", "difficulty_label",
+                        "opponent", "opponent_position",
+                        "opponent_line", "form_line", "venue_line"]:
+                if sub not in m:
+                    error(f"upcoming_matches row {i} missing key: '{sub}'")
+            difficulty = m.get("difficulty")
+            if difficulty is not None and difficulty not in (1, 2, 3, 4, 5):
+                error(f"upcoming_matches row {i} has invalid difficulty: {difficulty!r}")
+
 
 def _is_recent(date_str: str, max_days: int = 7) -> bool:
     """Check if a date string is within the last `max_days` days."""

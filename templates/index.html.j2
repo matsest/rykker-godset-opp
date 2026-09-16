@@ -421,10 +421,18 @@
                         {% if m.is_home %}{{ m.away_team }}{% else %}{{ m.home_team }}{% endif %}
                         <span class="match-venue">{% if m.is_home %}(Hjemme){% else %}(Borte){% endif %}</span>
                     </span>
-                    <span class="match-round">Runde {{ m.round }}</span>
+                    <span class="match-meta">
+                        <span class="match-round">Runde {{ m.round }}</span>
+                        {% if m.difficulty %}
+                        <span class="tooltip-trigger difficulty difficulty-{{ m.difficulty }}" tabindex="0" aria-label="Vanskelighetsgrad {{ m.difficulty }} av 5: {{ m.difficulty_label }}"><span class="hide-mobile">Vanskelighetsgrad {{ m.difficulty }}</span><span class="show-mobile">{{ m.difficulty }}</span>
+                            <span class="tooltip-text difficulty-tooltip"><strong>{{ m.difficulty_label }} ({{ m.difficulty }}/5)</strong><br>{{ m.opponent_line }}<br>{{ m.form_line }}<br>{{ m.venue_line }}</span>
+                        </span>
+                        {% endif %}
+                    </span>
                 </div>
                 {% endfor %}
             </div>
+            <p class="stats-note">Vanskelighetsgrad 1 (enklest) til 5 (tøffest). Basert på tabellstyrke (65%) og form siste 5 kamper (35%), justert for hjemme/borte og toppmotstand.</p>
             <p class="section-link"><a href="https://www.godset.no/terminliste" target="_blank" rel="noopener">Se alle kommende kamper på godset.no →</a></p>
         </section>
 

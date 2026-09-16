@@ -2,6 +2,7 @@
 """Generate statistics from raw NIFS data and save to data/stats.json."""
 
 import json
+import math
 import os
 import sys
 from datetime import datetime, timezone
@@ -20,6 +21,25 @@ TEAM_NAME = "Strømsgodset"
 PROMOTION_SPOTS = 2
 QUALIFICATION_SPOTS = 4  # 3rd to 6th
 RELEGATION_ZONE = 15
+
+# Fixture Difficulty Rating (FDR) weights, inspired by FPL methodology:
+# season strength dominates, recent form (last 5) matters less, and
+# venue is adjusted from the teams' actual points averages on that ground.
+SEASON_WEIGHT = 0.65
+FORM_WEIGHT = 0.35
+VENUE_SCALE = 0.5
+VENUE_MAX = 1.0
+# Fallback venue adjustments before enough matches are played.
+HOME_ADJ = -0.35
+AWAY_ADJ = 0.5
+
+DIFFICULTY_LABELS = {
+    1: "Enkel",
+    2: "Overkommelig",
+    3: "Middels",
+    4: "Tøff",
+    5: "Svært tøff",
+}
 
 
 def determine_status(position: int) -> tuple[str, str]:
@@ -604,6 +624,161 @@ def compare_to_table(rank: int, table_position: int) -> str:
     return "equal"
 
 
+def build_rating_map(team_stats: list[dict], key: str) -> dict[str, float]:
+    """Rank teams by a numeric key (highest first) and map rank linearly to 1-5.
+
+    Each rank step is worth 4/(n-1), so there are no bucket cliffs: teams one
+    rank apart always differ by the same small amount. Teams with equal values
+    share the same rank (competition ranking).
+    """
+    sorted_teams = sorted(team_stats, key=lambda t: t.get(key, 0), reverse=True)
+    n = len(sorted_teams)
+    ratings: dict[str, float] = {}
+    rank = 0
+    prev_value = None
+    for i, t in enumerate(sorted_teams):
+        value = t.get(key, 0)
+        if prev_value is None or value != prev_value:
+            rank = i + 1
+            prev_value = value
+        if n <= 1:
+            ratings[t["name"]] = 5.0
+        else:
+            ratings[t["name"]] = round(1 + 4 * (n - rank) / (n - 1), 2)
+    return ratings
+
+
+def calculate_fixture_difficulty(
+    opponent_name: str,
+    is_home: bool,
+    lookup: dict[str, dict],
+    season_ratings: dict[str, float],
+    form_ratings: dict[str, float],
+    own_name: str,
+    form_lists: dict[str, list[str]] | None = None,
+) -> dict:
+    """Calculate relative FDR 1-5 (1 = easiest) for one upcoming fixture."""
+    opp = lookup.get(opponent_name, {})
+    own = lookup.get(own_name, {})
+
+    opp_season = season_ratings.get(opponent_name, 3)
+    own_season = season_ratings.get(own_name, 3)
+    opp_form = form_ratings.get(opponent_name, 3)
+    own_form = form_ratings.get(own_name, 3)
+
+    opp_played = opp.get("played", 0)
+    own_played = own.get("played", 0)
+    league_home = sum(t.get("home_avg", 0.0) for t in lookup.values()) / max(len(lookup), 1)
+    league_away = sum(t.get("away_avg", 0.0) for t in lookup.values()) / max(len(lookup), 1)
+    if opp_played < 5 or own_played < 5:
+        # Early season: form is too noisy, rely on season strength only.
+        opp_combined = float(opp_season)
+        own_combined = float(own_season)
+    else:
+        opp_combined = SEASON_WEIGHT * opp_season + FORM_WEIGHT * opp_form
+        own_combined = SEASON_WEIGHT * own_season + FORM_WEIGHT * own_form
+
+    if opp_played < 5 or own_played < 5:
+        # Too few matches for reliable venue averages: use fixed adjustment.
+        venue_adj = HOME_ADJ if is_home else AWAY_ADJ
+        own_venue = own.get("home_avg", 0.0) if is_home else own.get("away_avg", 0.0)
+        opp_venue = opp.get("away_avg", 0.0) if is_home else opp.get("home_avg", 0.0)
+    else:
+        # Venue edge measured against the league average on each ground, so
+        # home and away figures (which have different baselines) are comparable.
+        # Positive edge means the opponent is relatively stronger there.
+        own_venue = own.get("home_avg", 0.0) if is_home else own.get("away_avg", 0.0)
+        opp_venue = opp.get("away_avg", 0.0) if is_home else opp.get("home_avg", 0.0)
+        if is_home:
+            edge = (opp_venue - league_away) - (own_venue - league_home)
+        else:
+            edge = (opp_venue - league_home) - (own_venue - league_away)
+        venue_adj = round(
+            max(-VENUE_MAX, min(VENUE_MAX, edge * VENUE_SCALE)), 2
+        )
+    raw = (opp_combined - own_combined) + 3 + venue_adj
+    # Absolute elite-opponent bonus: even for a top-rated team, an elite
+    # opponent in form can make a fixture very tough. Only applies above
+    # combined 4, adding 0-0.5 difficulty.
+    elite_bonus = round(max(0.0, opp_combined - 4) * 0.5, 2)
+    raw += elite_bonus
+    difficulty = max(1, min(5, math.floor(raw + 0.5)))
+
+    opp_ppg = opp.get("points_per_game", 0.0)
+    opp_form_avg = opp.get("points_avg_last_5", 0.0)
+    own_ground = "hjemme" if is_home else "borte"
+    opp_ground = "borte" if is_home else "hjemme"
+
+    opponent_line = (
+        f"{opponent_name}: {opp.get('position', '?')}. plass, "
+        f"{opp.get('points', '?')} poeng på {opp.get('played', '?')} kamper"
+    )
+    if elite_bonus > 0:
+        opponent_line += (
+            f". Toppmotstand: topp 3 på poengsnitt og i form (+{elite_bonus:.2f})"
+        )
+
+    form_results = (form_lists or {}).get(opponent_name, [])
+    won = form_results.count("W")
+    drawn = form_results.count("D")
+    lost = form_results.count("L")
+    form_points = 3 * won + drawn
+    form_line = (
+        f"Form siste {len(form_results)}: "
+        f"{won} {'seier' if won == 1 else 'seire'}, "
+        f"{drawn} uavgjort, {lost} tap ({form_points} poeng)"
+    )
+
+    if venue_adj < 0:
+        venue_effect = "trekker ned"
+    elif venue_adj > 0:
+        venue_effect = "trekker opp"
+    else:
+        venue_effect = "nøytral"
+
+    if is_home:
+        own_dev = own_venue - league_home
+        opp_dev = opp_venue - league_away
+    else:
+        own_dev = own_venue - league_away
+        opp_dev = opp_venue - league_home
+
+    def dev_words(dev: float, ground: str) -> str:
+        if dev > 0.05:
+            return f"er {abs(dev):.2f} over {ground}snittet"
+        if dev < -0.05:
+            return f"er {abs(dev):.2f} under {ground}snittet"
+        return f"er på {ground}snittet"
+
+    advantage = own_dev - opp_dev
+    if advantage >= 0.5:
+        verdict = "klar fordel oss"
+    elif advantage >= 0.15:
+        verdict = "liten fordel oss"
+    elif advantage > -0.15:
+        verdict = "omtrent jevnt"
+    elif advantage > -0.5:
+        verdict = f"liten fordel {opponent_name}"
+    else:
+        verdict = f"klar fordel {opponent_name}"
+
+    venue_line = (
+        f"Bane ({own_ground}): vi {dev_words(own_dev, own_ground)}, "
+        f"{opponent_name} {dev_words(opp_dev, opp_ground)} – {verdict}"
+    )
+
+    return {
+        "difficulty": difficulty,
+        "difficulty_label": DIFFICULTY_LABELS[difficulty],
+        "opponent_line": opponent_line,
+        "form_line": form_line,
+        "venue_line": venue_line,
+        "opponent_position": opp.get("position"),
+        "opponent_points_per_game": opp_ppg,
+        "opponent_form_avg": opp_form_avg,
+    }
+
+
 def build_form_stat_rank(
     team_name: str,
     field: str,
@@ -827,6 +1002,18 @@ def main():
     # Aggregate league-wide stats from match stats cache
     team_stats = aggregate_team_stats(match_stats, table_rows, matches_data, first_goal_stats_league)
     rankings = calculate_rankings(team_stats)
+
+    # Enrich upcoming matches with relative Fixture Difficulty Rating (1-5)
+    lookup = {t["name"]: t for t in team_stats}
+    season_ratings = build_rating_map(team_stats, "points_per_game")
+    form_ratings = build_rating_map(team_stats, "points_avg_last_5")
+    for m in next_5:
+        opponent_name = m["away_team"] if m["is_home"] else m["home_team"]
+        m["opponent"] = opponent_name
+        m.update(calculate_fixture_difficulty(
+            opponent_name, m["is_home"], lookup,
+            season_ratings, form_ratings, TEAM_NAME, last_5_form,
+        ))
 
     # Build Godset rank info grouped by category
     rank_categories = {
