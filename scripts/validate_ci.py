@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), "..")
 RAW_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
 STATS_PATH = os.path.join(PROJECT_ROOT, "data", "stats.json")
+ROUNDS_DIR = os.path.join(PROJECT_ROOT, "data")
 
 TEAM_NAME = "Strømsgodset"
 EXPECTED_TEAMS = 16
@@ -233,6 +234,85 @@ def validate_stats():
                 error(f"upcoming_matches row {i} has invalid difficulty: {difficulty!r}")
 
 
+def validate_round_files():
+    """Check per-round stats files (stats_round_<n>.json) for consistency."""
+    import glob as _glob
+    import re as _re
+
+    print("Validating per-round stats files...", file=sys.stderr)
+    pattern = os.path.join(ROUNDS_DIR, "stats_round_*.json")
+    files = sorted(_glob.glob(pattern))
+    if not files:
+        warn("No per-round stats files found (stats_round_*.json)")
+        return
+    required_top = ["generated_at", "season", "top_scorers", "team", "last_matches",
+                    "upcoming_matches", "table", "team_stats",
+                    "canonical_url", "history", "history_chart"]
+    for path in files:
+        label = os.path.basename(path)
+        num = _re.search(r"stats_round_(\d+)\.json$", label)
+        expected_round = int(num.group(1)) if num else None
+        stats = load_json(path)
+        if not isinstance(stats, dict):
+            error(f"{label} is not a dict")
+            continue
+        for key in required_top:
+            if key not in stats:
+                error(f"{label} missing top-level key: '{key}'")
+        season = stats.get("season", {})
+        if season.get("viewed_round") != expected_round:
+            error(f"{label} has viewed_round={season.get('viewed_round')}, expected {expected_round}")
+        if season.get("current_round") != expected_round:
+            error(f"{label} has current_round={season.get('current_round')}, expected {expected_round}")
+        history = stats.get("history")
+        if isinstance(history, list):
+            rounds = [h.get("round") for h in history if isinstance(h, dict)]
+            if expected_round not in rounds and rounds:
+                warn(f"{label} history does not include round {expected_round}")
+        team = stats.get("team", {})
+        position = team.get("position")
+        if isinstance(position, int) and not (1 <= position <= EXPECTED_TEAMS):
+            error(f"{label} team.position ({position}) out of range")
+    print(f"  -> {len(files)} round files checked", file=sys.stderr)
+
+
+def validate_sitemap():
+    """Check that site/sitemap.xml lists index plus every historical round page."""
+    import glob as _glob
+    import re as _re
+
+    print("Validating sitemap...", file=sys.stderr)
+    sitemap_path = os.path.join(PROJECT_ROOT, "site", "sitemap.xml")
+    if not os.path.exists(sitemap_path):
+        error("site/sitemap.xml not built (run make build)")
+        return
+    with open(sitemap_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    if "https://godset.mats.codes/</loc>" not in content:
+        error("sitemap.xml missing index URL (https://godset.mats.codes/)")
+
+    round_files = sorted(_glob.glob(os.path.join(ROUNDS_DIR, "stats_round_*.json")))
+    numbers = []
+    for path in round_files:
+        num = _re.search(r"stats_round_(\d+)\.json$", os.path.basename(path))
+        if num:
+            numbers.append(int(num.group(1)))
+    if not numbers:
+        return
+    latest = max(numbers)
+    missing = [
+        n for n in numbers
+        if n != latest and f"https://godset.mats.codes/{n}.html</loc>" not in content
+    ]
+    for n in missing:
+        error(f"sitemap.xml missing round URL for round {n}")
+    if latest in numbers and f"https://godset.mats.codes/{latest}.html</loc>" in content:
+        warn(f"sitemap.xml lists latest round ({latest}) although index.html covers it")
+    listed = len(_re.findall(r"<loc>", content))
+    print(f"  -> {listed} URLs listed, {len(missing)} missing", file=sys.stderr)
+
+
 def _is_recent(date_str: str, max_days: int = 7) -> bool:
     """Check if a date string is within the last `max_days` days."""
     try:
@@ -290,6 +370,8 @@ def main():
     validate_raw()
     validate_match_stats_content()
     validate_stats()
+    validate_round_files()
+    validate_sitemap()
 
     if warnings:
         print(f"\n{len(warnings)} warning(s)", file=sys.stderr)

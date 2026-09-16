@@ -10,7 +10,9 @@ build/
 # Generated data & site (recreated by `make all`)
 data/raw/*.json
 data/stats.json
-site/index.html
+data/stats_round_*.json
+site/*.html
+site/sitemap.xml
 
 # OS
 .DS_Store

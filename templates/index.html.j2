@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Rykker Godset Opp? – Følg Strømsgodsets vei tilbake til Eliteserien</title>
+    <title>{% if season.is_historical %}Runde {{ season.viewed_round }} – {% endif %}Rykker Godset Opp? – Følg Strømsgodsets vei tilbake til Eliteserien</title>
     <meta name="description" content="Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.">
     <meta name="keywords" content="Strømsgodset, Godset, OBOS-ligaen, opprykk, Eliteserien, tabell, fotball, 2026">
     <meta name="author" content="Mats Estensen">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://godset.mats.codes/">
+    <link rel="canonical" href="{{ canonical_url }}">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
@@ -19,7 +19,7 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://godset.mats.codes/">
+    <meta property="og:url" content="{{ canonical_url }}">
     <meta property="og:title" content="Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.">
     <meta property="og:description" content="Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.">
     <meta property="og:locale" content="nb_NO">
@@ -31,7 +31,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@matsest">
     <meta name="twitter:creator" content="@matsest">
-    <meta name="twitter:url" content="https://godset.mats.codes/">
+    <meta name="twitter:url" content="{{ canonical_url }}">
     <meta name="twitter:title" content="Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.">
     <meta name="twitter:description" content="Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.">
     <meta name="twitter:image" content="https://godset.mats.codes/og-image.png">
@@ -82,6 +82,7 @@
             <div class="nav-menu" id="nav-menu">
                 <a href="#opprykksstatus">Opprykksstatus</a>
                 <a href="#nokkeltall">Nøkkeltall</a>
+                <a href="#sesongutvikling">Utvikling</a>
                 <a href="#ligastatistikk">Ligastatistikk</a>
                 <a href="#form">Form</a>
                 <a href="#siste-resultater">Resultater</a>
@@ -121,6 +122,26 @@
                 </div>
             </div>
         </section>
+
+        {# Round Selector #}
+        <div class="round-bar">
+            <label class="round-label" for="round-selector">Velg runde:</label>
+            <select id="round-selector" class="round-select" aria-label="Velg runde å vise">
+                {% for r in season.available_rounds|reverse %}
+                <option value="{% if r == season.latest_round %}index.html{% else %}{{ r }}.html{% endif %}"{% if r == season.viewed_round %} selected{% endif %}>Runde {{ r }}{% if r == season.latest_round %} (siste){% endif %}</option>
+                {% endfor %}
+            </select>
+            <noscript>
+                <p class="round-links">
+                    {% for r in season.available_rounds|reverse %}
+                    <a href="{% if r == season.latest_round %}index.html{% else %}{{ r }}.html{% endif %}">{{ r }}</a>{% if not loop.last %} · {% endif %}
+                    {% endfor %}
+                </p>
+            </noscript>
+        </div>
+        {% if season.is_historical %}
+        <p class="history-banner">Viser runde {{ season.viewed_round }} – tallene er slik de så ut da. <a href="index.html">Se ferskeste (runde {{ season.latest_round }})</a></p>
+        {% endif %}
 
         {# Promotion Status #}
         <section class="section" id="opprykksstatus">
@@ -175,6 +196,62 @@
             </div>
             <p class="stats-note">Skalaen er basert på gjennomsnittlig poengbehov for direkte opprykk (~58 poeng) og kvalikplass (~46 poeng) i OBOS-ligaen de siste fem sesongene.</p>
         </section>
+
+        {# Season Development #}
+        {% if history %}
+        <section class="section" id="sesongutvikling">
+            <h2 class="section-title"><a href="#sesongutvikling">Sesongutvikling</a></h2>
+            <p class="section-intro">Plassering etter hver runde denne sesongen. Trykk på en runde i grafen eller velg runde øverst for å se tallene slik de så ut da.</p>
+            {% if history_chart and history_chart.dots %}
+            <div class="history-chart-wrapper">
+                <svg class="history-chart" viewBox="0 0 {{ history_chart.width }} {{ history_chart.height }}" role="img" aria-label="Plassering per runde">
+                    {% for zone in history_chart.zones %}
+                    <rect x="{{ zone.x }}" y="{{ zone.y }}" width="{{ zone.width }}" height="{{ zone.height }}" class="{{ zone.class }}" />
+                    {% endfor %}
+                    {% for tick in history_chart.ticks %}
+                    <line x1="{{ history_chart.plot_left }}" y1="{{ tick.y }}" x2="{{ history_chart.plot_right }}" y2="{{ tick.y }}" class="history-grid" />
+                    <text x="26" y="{{ tick.y + 4 }}" text-anchor="end" class="history-tick {{ tick.class }}">{{ tick.position }}.</text>
+                    {% endfor %}
+                    <polyline points="{{ history_chart.position_points }}" class="history-line" />
+                    {% for dot in history_chart.dots %}
+                    <a href="{% if dot.round == season.latest_round %}index.html{% else %}{{ dot.round }}.html{% endif %}">
+                        <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="5" class="history-dot{% if dot.round == season.viewed_round %} history-dot-current{% endif %} form-{{ (dot.result or '')|lower }}" />
+                        <title>Runde {{ dot.round }}: {{ dot.position }}. plass, {{ dot.points }} poeng</title>
+                    </a>
+                    {% endfor %}
+                    {% for label in history_chart.x_labels %}
+                    <text x="{{ label.x }}" y="{{ history_chart.height - 8 }}" text-anchor="middle" class="history-round-label">{{ label.round }}</text>
+                    {% endfor %}
+                </svg>
+            </div>
+            {% endif %}
+            <details class="history-details">
+                <summary class="history-summary">Vis tabell over alle runder</summary>
+                <div class="table-wrapper">
+                <table class="league-table history-table">
+                    <thead>
+                        <tr>
+                            <th>Runde</th>
+                            <th>Plass</th>
+                            <th>Poeng</th>
+                            <th>Resultat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in history|reverse %}
+                        <tr class="{% if h.round == season.viewed_round %}highlight{% endif %}">
+                            <td class="pos"><a href="{% if h.round == season.latest_round %}index.html{% else %}{{ h.round }}.html{% endif %}">{{ h.round }}</a></td>
+                            <td class="pos history-pos {% if h.position <= 2 %}pos-promotion{% elif h.position <= 6 %}pos-qualification{% elif h.position == 14 %}pos-playoff{% elif h.position >= 15 %}pos-relegation{% endif %}">{{ h.position }}.</td>
+                            <td class="points">{{ h.points }}</td>
+                            <td class="history-result result-{{ (h.result or '')|lower }}">{% if h.result == 'W' %}Seier{% elif h.result == 'D' %}Uavgjort{% elif h.result == 'L' %}Tap{% else %}–{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </details>
+        </section>
+        {% endif %}
 
         {# League Stats #}
         {% if team.ranks %}
@@ -808,11 +885,19 @@
             observer.observe(sentinel);
         }
 
+        // Round selector
+        var roundSelector = document.getElementById('round-selector');
+        if (roundSelector) {
+            roundSelector.addEventListener('change', function() {
+                window.location.href = roundSelector.value;
+            });
+        }
+
         // Copy link button
         var copyBtn = document.getElementById('copy-link');
         if (copyBtn) {
             copyBtn.addEventListener('click', function() {
-                var url = 'https://godset.mats.codes/';
+                var url = '{{ canonical_url }}';
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(url).then(function() {
                         copyBtn.setAttribute('title', 'Kopiert!');

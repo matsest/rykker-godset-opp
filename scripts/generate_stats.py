@@ -815,14 +815,265 @@ def build_form_stat_rank(
     }
 
 
-def main():
+def get_completed_rounds(matches_data: list) -> list[int]:
+    """Return sorted rounds where at least one match has a completed result."""
+    rounds = set()
+    for m in matches_data:
+        if not isinstance(m.get("round"), int):
+            continue
+        result = m.get("result", {}) or {}
+        if result.get("homeScore90") is not None and result.get("awayScore90") is not None:
+            rounds.add(m["round"])
+    return sorted(rounds)
+
+
+def build_historical_table_rows(table_data: dict, matches_data: list, target_round: int) -> list[dict]:
+    """Rebuild league table from match results up to and including target_round.
+
+    table.json only reflects the latest standings, so historical round pages
+    must replay results. Points, goal difference and goals scored decide the
+    order; NIFS head-to-head tiebreakers are not reproducible from
+    matches.json alone, so remaining ties fall back to name order.
+    """
+    source_rows = table_data.get("teams", []) if isinstance(table_data, dict) else []
+    records: dict[str, dict] = {}
+    for row in source_rows:
+        name = row["name"]
+        records[name] = {
+            "name": name,
+            "shortName": row.get("shortName", name),
+            "withdrawn": row.get("withdrawnPoints", 0) or 0,
+            "played": 0,
+            "won": 0,
+            "draw": 0,
+            "lost": 0,
+            "goalsScored": 0,
+            "goalsConceded": 0,
+        }
+
+    for m in matches_data:
+        if m.get("round", 0) > target_round:
+            continue
+        result = m.get("result", {}) or {}
+        home_score = result.get("homeScore90")
+        away_score = result.get("awayScore90")
+        if home_score is None or away_score is None:
+            continue
+        home = m["homeTeam"]["name"]
+        away = m["awayTeam"]["name"]
+        for team in (home, away):
+            if team not in records:
+                records[team] = {
+                    "name": team,
+                    "shortName": team,
+                    "withdrawn": 0,
+                    "played": 0,
+                    "won": 0,
+                    "draw": 0,
+                    "lost": 0,
+                    "goalsScored": 0,
+                    "goalsConceded": 0,
+                }
+        records[home]["played"] += 1
+        records[away]["played"] += 1
+        records[home]["goalsScored"] += home_score
+        records[home]["goalsConceded"] += away_score
+        records[away]["goalsScored"] += away_score
+        records[away]["goalsConceded"] += home_score
+        if home_score == away_score:
+            records[home]["draw"] += 1
+            records[away]["draw"] += 1
+        elif home_score > away_score:
+            records[home]["won"] += 1
+            records[away]["lost"] += 1
+        else:
+            records[away]["won"] += 1
+            records[home]["lost"] += 1
+
+    rows = []
+    for r in records.values():
+        points = r["won"] * 3 + r["draw"] - r["withdrawn"]
+        rows.append({
+            "name": r["name"],
+            "shortName": r["shortName"],
+            "played": r["played"],
+            "won": r["won"],
+            "draw": r["draw"],
+            "lost": r["lost"],
+            "goalsScored": r["goalsScored"],
+            "goalsConceded": r["goalsConceded"],
+            "goalDifference": r["goalsScored"] - r["goalsConceded"],
+            "points": points,
+        })
+
+    rows.sort(key=lambda r: (-r["points"], -r["goalDifference"], -r["goalsScored"], r["name"]))
+    for i, r in enumerate(rows):
+        r["place"] = i + 1
+    return rows
+
+
+def compute_history(table_data: dict, matches_data: list, completed_rounds: list[int]) -> list[dict]:
+    """Return per-round position/points/result for the team across the season."""
+    results_by_round: dict[int, str | None] = {}
+    for m in matches_data:
+        home = m["homeTeam"]["name"]
+        away = m["awayTeam"]["name"]
+        if home != TEAM_NAME and away != TEAM_NAME:
+            continue
+        result = parse_match_result(m, TEAM_NAME)
+        if result is not None:
+            results_by_round[m["round"]] = result
+
+    history = []
+    for r in completed_rounds:
+        rows = build_historical_table_rows(table_data, matches_data, r)
+        for row in rows:
+            if row["name"] == TEAM_NAME:
+                history.append({
+                    "round": r,
+                    "position": row["place"],
+                    "points": row["points"],
+                    "played": row["played"],
+                    "result": results_by_round.get(r),
+                })
+                break
+    return history
+
+
+def build_history_chart(history: list[dict], total_teams: int = 16) -> dict:
+    """Precompute SVG coordinates for the season position chart."""
+    width, height = 620, 240
+    pad_left, pad_right, pad_top, pad_bottom = 30, 12, 12, 24
+    rounds = [h["round"] for h in history]
+    min_round, max_round = (min(rounds), max(rounds)) if rounds else (1, 1)
+    span = max(max_round - min_round, 1)
+
+    def x_pos(r: int) -> float:
+        return round(pad_left + (r - min_round) / span * (width - pad_left - pad_right), 1)
+
+    def y_pos(position: int) -> float:
+        return round(pad_top + (position - 1) / max(total_teams - 1, 1) * (height - pad_top - pad_bottom), 1)
+
+    dots = [
+        {
+            "round": h["round"],
+            "x": x_pos(h["round"]),
+            "y": y_pos(h["position"]),
+            "position": h["position"],
+            "points": h["points"],
+            "result": h.get("result"),
+        }
+        for h in history
+    ]
+
+    def tick_class(position: int) -> str:
+        if total_teams != 16:
+            return ""
+        if position <= 2:
+            return "tick-promotion"
+        if position <= 6:
+            return "tick-qualification"
+        if position == 14:
+            return "tick-playoff"
+        if position >= 15:
+            return "tick-relegation"
+        return ""
+    ticks = [
+        {"position": p, "y": y_pos(p), "class": tick_class(p)}
+        for p in range(1, total_teams + 1)
+    ]
+    picked_rounds = sorted(
+        {min_round, max_round}
+        | {r for r in range(min_round, max_round + 1) if r % 5 == 0}
+    )
+    x_labels = [{"round": r, "x": x_pos(r)} for r in picked_rounds]
+    plot_width = width - pad_left - pad_right
+    step = (height - pad_top - pad_bottom) / max(total_teams - 1, 1)
+
+    def band(top: int, bottom: int, css_class: str) -> dict:
+        top = max(top, 1)
+        bottom = min(bottom, total_teams)
+        y = max(y_pos(top) - step / 2, pad_top)
+        bottom_edge = min(y_pos(bottom) + step / 2, height - pad_bottom)
+        return {
+            "x": pad_left,
+            "y": round(y, 1),
+            "width": plot_width,
+            "height": round(max(bottom_edge - y, 0), 1),
+            "class": css_class,
+        }
+
+    zones = [
+        band(1, 2, "zone-promotion"),
+        band(3, 6, "zone-qualification"),
+        band(14, 14, "zone-playoff"),
+        band(15, 16, "zone-relegation"),
+    ]
+    return {
+        "width": width,
+        "height": height,
+        "pad_bottom": pad_bottom,
+        "plot_left": pad_left,
+        "plot_right": width - pad_right,
+        "min_round": min_round,
+        "max_round": max_round,
+        "position_points": " ".join(f"{d['x']},{d['y']}" for d in dots),
+        "dots": dots,
+        "ticks": ticks,
+        "zones": zones,
+        "x_labels": x_labels,
+    }
+
+
+def main(target_round: int | None = None):
     table_data = load_raw("table")
     matches_data = load_raw("matches")
     match_stats = load_match_stats()
 
-    # Extract table rows
-    table_rows = table_data.get("teams", [])
+    completed_rounds = get_completed_rounds(matches_data)
+    if not completed_rounds:
+        print("ERROR: No completed rounds found", file=sys.stderr)
+        sys.exit(1)
+    latest_round = max(completed_rounds)
+    if target_round is None:
+        target_round = latest_round
+    if target_round not in completed_rounds:
+        print(f"ERROR: Round {target_round} has no completed matches "
+              f"(completed: {completed_rounds[0]}-{latest_round})", file=sys.stderr)
+        sys.exit(1)
+
+    # Season history is identical on every round page; compute before filtering.
+    history = compute_history(table_data, matches_data, completed_rounds)
+    history_chart = build_history_chart(history, total_teams=len(table_data.get("teams", [])))
+
+    match_round_by_id = {str(m.get("id")): m.get("round", 0) for m in matches_data}
+
+    # Strip results beyond the viewed round so form, table and upcoming
+    # fixtures reflect what was known at that point in time.
+    filtered_matches = []
+    for m in matches_data:
+        result = m.get("result", {}) or {}
+        if m.get("round", 0) > target_round and result.get("homeScore90") is not None:
+            m = {**m, "result": {}}
+        filtered_matches.append(m)
+    matches_data = filtered_matches
+    match_stats = {
+        mid: data for mid, data in match_stats.items()
+        if match_round_by_id.get(mid, 0) <= target_round
+    }
+
+    # Extract table rows (rebuilt from results so historical rounds get correct standings)
+    table_rows = build_historical_table_rows(table_data, matches_data, target_round)
     stage_info = table_data.get("stage", {})
+
+    round_completed_at = max(
+        (
+            m["timestamp"][:10] for m in matches_data
+            if m.get("round") == target_round
+            and (m.get("result", {}) or {}).get("homeScore90") is not None
+        ),
+        default=None,
+    )
 
     # Find Godset
     team_row = None
@@ -1122,8 +1373,20 @@ def main():
             "stage_id": stage_info.get("id"),
             "name": stage_info.get("fullName", "OBOS-ligaen 2026"),
             "total_rounds": stage_info.get("numberOfRounds", 30),
-            "current_round": max((m["round"] for m in completed), default=0),
+            "current_round": target_round,
+            "viewed_round": target_round,
+            "latest_round": latest_round,
+            "available_rounds": completed_rounds,
+            "is_historical": target_round != latest_round,
+            "round_completed_at": round_completed_at,
         },
+        "canonical_url": (
+            "https://godset.mats.codes/"
+            if target_round == latest_round
+            else f"https://godset.mats.codes/{target_round}.html"
+        ),
+        "history": history,
+        "history_chart": history_chart,
         "top_scorers": top_scorers,
         "team": {
             "name": TEAM_NAME,
@@ -1182,15 +1445,19 @@ def main():
         "team_stats": team_stats,
     }
 
+    round_path = os.path.join(os.path.dirname(STATS_PATH), f"stats_round_{target_round}.json")
     os.makedirs(os.path.dirname(STATS_PATH), exist_ok=True)
-    with open(STATS_PATH, "w", encoding="utf-8") as f:
+    with open(round_path, "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=2, ensure_ascii=False)
+    if target_round == latest_round:
+        with open(STATS_PATH, "w", encoding="utf-8") as f:
+            json.dump(stats, f, indent=2, ensure_ascii=False)
 
-    print(f"Stats saved to {STATS_PATH}", file=sys.stderr)
+    print(f"Round {target_round}: stats saved to {round_path}", file=sys.stderr)
     print(f"Godset: {position}. plass, {points} poeng – {status_text}", file=sys.stderr)
 
-    # Print rank summary
-    if team_ranks:
+    # Print rank summary for the latest round only to keep multi-round output readable
+    if team_ranks and target_round == latest_round:
         print(f"\nLigarankinger:", file=sys.stderr)
         for category_key, category in team_ranks.items():
             print(f"  {category['label']}:", file=sys.stderr)
@@ -1200,4 +1467,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate statistics, optionally for a single round.")
+    parser.add_argument("--round", type=int, default=None, help="Only build stats for this round")
+    args = parser.parse_args()
+
+    if args.round is not None:
+        main(target_round=args.round)
+    else:
+        for completed_round in get_completed_rounds(load_raw("matches")):
+            main(target_round=completed_round)

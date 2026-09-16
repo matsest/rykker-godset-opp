@@ -17,8 +17,8 @@ Three-step static-site generator plus a validation step. Order matters.
 
 ```
 scripts/fetch_data.py      →  data/raw/*.json  (inkl. match_stats.json)
-scripts/generate_stats.py  →  data/stats.json
-scripts/build_site.py      →  site/index.html
+scripts/generate_stats.py  →  data/stats.json + data/stats_round_<n>.json (ett sett per ferdige runde)
+scripts/build_site.py      →  site/index.html (siste runde) + site/<n>.html (én side per runde) + site/sitemap.xml
 scripts/validate_ci.py     →  exit 0/1 (data integrity check)
 ```
 
@@ -27,8 +27,8 @@ Use the Makefile instead of raw script paths:
 | Command | What it does |
 |---------|--------------|
 | `make fetch` | Hits NIFS API (stage 700912) |
-| `make stats` | Reads `data/raw/`, writes `data/stats.json` |
-| `make build` | Reads `data/stats.json`, writes `site/index.html` |
+| `make stats` | Reads `data/raw/`, writes `data/stats.json` (latest) + `data/stats_round_<n>.json` per completed round |
+| `make build` | Reads `data/stats*.json`, writes `site/index.html` + `site/<n>.html` per round |
 | `make validate` | Runs `scripts/validate_ci.py` for deep data-integrity checks |
 | `make all` | Runs fetch → stats → build in order |
 | `make ci` | Runs `make all` + `make validate` + verifies static assets exist |
@@ -51,8 +51,9 @@ Only run `make ci` when you want the full pipeline plus data-integrity checks. Y
 
 - **NIFS API stage ID:** `700912` (OBOS-ligaen 2026), hardcoded in `scripts/fetch_data.py`.
 - **Team name in API:** `Strømsgodset` (not "Godset"), hardcoded in `scripts/generate_stats.py`.
-- **Template engine:** Jinja2 (`templates/index.html.j2`).
-- **Output:** Single-file static site (`site/index.html` + `site/style.css`). No JS bundler, no framework.
+- **Template engine:** Jinja2 (`templates/index.html.j2`), rendered once per completed round.
+- **Output:** Static pages (`site/index.html` for latest round + `site/<n>.html` per round, sharing `site/style.css`). No JS bundler, no framework. Round switching is plain page navigation via a `<select>` element.
+- **Historical rounds:** `generate_stats.py` rebuilds the table from `matches.json` results up to each round (`build_historical_table_rows`) since `table.json` only holds current standings. Season history (`compute_history`) powers the `Sesongutvikling` chart on every page.
 - **Promotion rules (2026):** 1-2 direct promotion, 3-6 qualification, 14 relegation playoff, 15-16 direct relegation. Reflected in CSS classes and stats logic.
 - **Match stats caching:** `fetch_data.py` incrementally fetches per-match statistics (`matches/{id}/`) and caches them in `data/raw/match_stats.json` to minimize API calls. Note: `teams.json` is no longer fetched as it was unused by the pipeline.
 - **League-wide aggregation:** `generate_stats.py` aggregates per-team stats (shots, chances, possession, conversion rate) across all matches and calculates league rankings for each category, exposed via the `Ligastatistikk` section.
@@ -89,9 +90,11 @@ If you change the build pipeline, update both the Makefile and the workflow.
 
 - `data/raw/*.json`
 - `data/stats.json`
-- `site/index.html`
+- `data/stats_round_*.json`
+- `site/*.html` (index + per-round pages)
+- `site/sitemap.xml` (generated from completed rounds; latest round covered by index URL)
 
-Static files in `site/` (style.css, og-image.png, favicon.svg, sitemap.xml) are not generated and must be committed.
+Static files in `site/` (style.css, og-image.png, favicon.svg) are not generated and must be committed. `site/robots.txt` is also committed and references the generated `site/sitemap.xml`.
 
 ## Language Conventions
 

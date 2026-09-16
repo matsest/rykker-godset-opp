@@ -16,6 +16,13 @@
     --qualification: #17a2b8;
     --relegation-playoff: #fd7e14;
     --relegation: #dc3545;
+    /* Shared zone palette for season chart + history table.
+       Qualification uses darkened yellow (same hue as the chart band)
+       since pure yellow text is unreadable on white. */
+    --zone-promotion: #28a745;
+    --zone-qualification: #b38600;
+    --zone-playoff: #fd7e14;
+    --zone-relegation: #dc3545;
 }
 
 * {
@@ -1665,4 +1672,215 @@ button.match-row.match-btn:focus-visible {
     .gauge-needle {
         transition: none;
     }
+}
+
+/* Round selector */
+.round-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.round-label {
+    font-weight: 700;
+    color: var(--godset-blue);
+    font-size: 0.9rem;
+}
+
+.round-select {
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--godset-blue);
+    background: var(--white);
+    border: 2px solid var(--godset-blue);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    max-width: 100%;
+}
+
+.round-links {
+    width: 100%;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.round-links a {
+    color: var(--godset-blue);
+    font-weight: 600;
+}
+
+.history-banner {
+    text-align: center;
+    font-size: 0.9rem;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.history-banner a {
+    color: var(--godset-blue);
+    font-weight: 700;
+}
+
+/* Season development chart */
+.history-chart-wrapper {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+
+.history-chart {
+    width: 100%;
+    min-width: 420px;
+    height: auto;
+    display: block;
+}
+
+.history-grid {
+    stroke: var(--gray-200);
+    stroke-width: 1;
+}
+
+.zone-promotion {
+    fill: rgba(40, 167, 69, 0.10);
+}
+
+.zone-qualification {
+    fill: rgba(255, 193, 7, 0.14);
+}
+
+.zone-playoff {
+    fill: rgba(253, 126, 20, 0.10);
+}
+
+.zone-relegation {
+    fill: rgba(220, 53, 69, 0.10);
+}
+
+.history-tick {
+    font-size: 10px;
+    fill: var(--gray-600);
+}
+
+.history-tick.tick-promotion {
+    fill: var(--zone-promotion);
+    font-weight: 700;
+}
+
+.history-tick.tick-qualification {
+    fill: var(--zone-qualification);
+    font-weight: 700;
+}
+
+.history-tick.tick-playoff {
+    fill: var(--zone-playoff);
+    font-weight: 700;
+}
+
+.history-tick.tick-relegation {
+    fill: var(--zone-relegation);
+    font-weight: 700;
+}
+
+.history-line {
+    fill: none;
+    stroke: var(--godset-blue);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.history-dot {
+    fill: var(--godset-blue);
+    stroke: #fff;
+    stroke-width: 1.5;
+    cursor: pointer;
+}
+
+.history-dot.form-w {
+    fill: var(--win);
+}
+
+.history-dot.form-d {
+    fill: var(--draw);
+}
+
+.history-dot.form-l {
+    fill: var(--loss);
+}
+
+.history-dot-current {
+    stroke: var(--godset-blue);
+    stroke-width: 3;
+}
+
+.history-round-label {
+    font-size: 10px;
+    fill: var(--gray-600);
+}
+
+.history-table td a {
+    color: inherit;
+    font-weight: 600;
+}
+
+.history-pos.pos-promotion {
+    color: var(--zone-promotion);
+}
+
+.history-pos.pos-qualification {
+    color: var(--zone-qualification);
+}
+
+.history-pos.pos-playoff {
+    color: var(--zone-playoff);
+}
+
+.history-pos.pos-relegation {
+    color: var(--zone-relegation);
+}
+
+.history-result {
+    font-weight: 600;
+}
+
+.history-result.result-w {
+    color: var(--zone-promotion);
+}
+
+.history-result.result-d {
+    color: var(--zone-qualification);
+}
+
+.history-result.result-l {
+    color: var(--zone-relegation);
+}
+
+.history-details {
+    margin-top: 0.25rem;
+}
+
+.history-summary {
+    display: inline-block;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--godset-blue);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    padding: 0.25rem 0;
+}
+
+.history-summary:hover {
+    text-decoration-style: solid;
+}
+
+.history-details .table-wrapper {
+    margin-top: 0.75rem;
 }
