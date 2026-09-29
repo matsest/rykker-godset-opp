@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Build-time narrative judgments via Jev (TypeSafe System One).
+"""Match storyline labels via Jev (TypeSafe System One).
 
-Prototype for issue #10 (idea 1: kampetikett). Asks one batched
-``Choice`` question per completed match in ``last_matches`` and returns
-a typed storyline label the template renders as a pill.
+Asks one batched ``Choice`` question per completed match in ``last_matches``
+and returns a typed storyline label the template renders as a pill.
 
 Rules:
 - Code owns all data prep and gating; Jev only picks a label.
