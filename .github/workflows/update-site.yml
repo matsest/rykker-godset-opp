@@ -49,13 +49,17 @@ jobs:
       - name: Cache NIFS data
         uses: actions/cache@v6
         with:
-          path: data/raw/
+          path: |
+            data/raw/
+            data/storyline_cache.json
           key: nifs-data-${{ github.run_id }}
           restore-keys: |
             nifs-data-
 
       - name: Build site
         run: make ci
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

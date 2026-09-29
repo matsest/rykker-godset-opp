@@ -1025,7 +1025,7 @@ def build_history_chart(history: list[dict], total_teams: int = 16) -> dict:
     }
 
 
-def main(target_round: int | None = None):
+def main(target_round: int | None = None, with_jev: bool = False):
     table_data = load_raw("table")
     matches_data = load_raw("matches")
     match_stats = load_match_stats()
@@ -1266,6 +1266,17 @@ def main(target_round: int | None = None):
             season_ratings, form_ratings, TEAM_NAME, last_5_form,
         ))
 
+    # Optional Jev enrichment (latest round only; historical pages stay frozen).
+    storyline_legend: dict = {}
+    if with_jev and target_round == latest_round:
+        from narrative import fetch_storylines, get_legend
+        storylines = fetch_storylines(last_5)
+        for m in last_5:
+            if m["match_id"] in storylines:
+                m["storyline"] = storylines[m["match_id"]]
+        print(f"  -> storyline labels on {len(storylines)}/{len(last_5)} matches", file=sys.stderr)
+        storyline_legend = get_legend()
+
     # Build Godset rank info grouped by category
     rank_categories = {
         "offense": {
@@ -1440,6 +1451,7 @@ def main(target_round: int | None = None):
             "goal_timing": goal_timing,
         },
         "last_matches": last_5,
+        "storyline_legend": storyline_legend,
         "upcoming_matches": next_5,
         "table": full_table,
         "team_stats": team_stats,
@@ -1471,10 +1483,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Generate statistics, optionally for a single round.")
     parser.add_argument("--round", type=int, default=None, help="Only build stats for this round")
+    parser.add_argument("--with-jev", action="store_true", help="Enrich latest round with Jev storyline labels (needs TYPESAFE_API_KEY)")
     args = parser.parse_args()
 
     if args.round is not None:
-        main(target_round=args.round)
+        main(target_round=args.round, with_jev=args.with_jev)
     else:
         for completed_round in get_completed_rounds(load_raw("matches")):
-            main(target_round=completed_round)
+            main(target_round=completed_round, with_jev=args.with_jev)

@@ -1,4 +1,4 @@
-.PHONY: help fetch stats build validate serve clean all ci
+.PHONY: help fetch stats stats-jev build validate serve clean all ci
 
 # Default target
 help:
@@ -6,6 +6,7 @@ help:
 	@echo ""
 	@echo "  make fetch    – Fetch latest data from NIFS API"
 	@echo "  make stats    – Generate stats per completed round (stats_round_<n>.json + stats.json)"
+	@echo "  make stats-jev – Same as stats, plus Jev storyline labels on latest round"
 	@echo "  make build    – Build static site (index.html + <n>.html per round + sitemap.xml)"
 	@echo "  make validate – Run data-integrity checks (incl. round files and sitemap)"
 	@echo "  make all      – Run fetch → stats → build"
@@ -24,6 +25,9 @@ fetch:
 stats:
 	uv run python scripts/generate_stats.py
 
+stats-jev:
+	uv run python scripts/generate_stats.py --with-jev
+
 build:
 	uv run python scripts/build_site.py
 
@@ -31,7 +35,7 @@ validate:
 	@uv run python scripts/validate_ci.py
 
 # Combined
-all: fetch stats build
+all: fetch stats-jev build
 
 # CI target (used by GitHub Actions)
 ci: all validate

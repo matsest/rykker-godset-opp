@@ -11,6 +11,7 @@ build/
 data/raw/*.json
 data/stats.json
 data/stats_round_*.json
+data/storyline_cache.json
 site/*.html
 site/sitemap.xml
 
@@ -24,3 +25,4 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.env
