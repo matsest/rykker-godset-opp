@@ -28,9 +28,10 @@ Use the Makefile instead of raw script paths:
 |---------|--------------|
 | `make fetch` | Hits NIFS API (stage 700912) |
 | `make stats` | Reads `data/raw/`, writes `data/stats.json` (latest) + `data/stats_round_<n>.json` per completed round |
+| `make stats-jev` | Same as `stats`, plus Jev storyline labels on the latest round (cached per match, needs `TYPESAFE_API_KEY`) |
 | `make build` | Reads `data/stats*.json`, writes `site/index.html` + `site/<n>.html` per round |
 | `make validate` | Runs `scripts/validate_ci.py` for deep data-integrity checks |
-| `make all` | Runs fetch → stats → build in order |
+| `make all` | Runs fetch → stats-jev → build in order |
 | `make ci` | Runs `make all` + `make validate` + verifies static assets exist |
 | `make serve` | `python -m http.server 8000` inside `site/` |
 | `make clean` | Deletes generated files (`data/raw/*.json`, `data/stats.json`, `site/index.html`) |
@@ -56,6 +57,7 @@ Only run `make ci` when you want the full pipeline plus data-integrity checks. Y
 - **Historical rounds:** `generate_stats.py` rebuilds the table from `matches.json` results up to each round (`build_historical_table_rows`) since `table.json` only holds current standings. Season history (`compute_history`) powers the `Sesongutvikling` chart on every page.
 - **Promotion rules (2026):** 1-2 direct promotion, 3-6 qualification, 14 relegation playoff, 15-16 direct relegation. Reflected in CSS classes and stats logic.
 - **Match stats caching:** `fetch_data.py` incrementally fetches per-match statistics (`matches/{id}/`) and caches them in `data/raw/match_stats.json` to minimize API calls. Note: `teams.json` is no longer fetched as it was unused by the pipeline.
+- **Storyline caching:** `narrative.py` calls Jev once per *new* completed match and caches raw answers in `data/storyline_cache.json` (keyed by match ID, versioned by criteria text). Quiet days cost zero tokens; gating is applied at read time so gate tuning never invalidates the cache. Missing key or API failure falls back to cached/badgeless output, never failing the build. Only the latest round is enriched; historical pages stay frozen. CI persists the cache via `actions/cache` and provides the key as `TYPESAFE_API_KEY` (repo secret).
 - **League-wide aggregation:** `generate_stats.py` aggregates per-team stats (shots, chances, possession, conversion rate) across all matches and calculates league rankings for each category, exposed via the `Ligastatistikk` section.
 - **Anchor links:** All page sections have `id` attributes and clickable headings for direct URL hash navigation.
 
@@ -91,6 +93,7 @@ If you change the build pipeline, update both the Makefile and the workflow.
 - `data/raw/*.json`
 - `data/stats.json`
 - `data/stats_round_*.json`
+- `data/storyline_cache.json`
 - `site/*.html` (index + per-round pages)
 - `site/sitemap.xml` (generated from completed rounds; latest round covered by index URL)
 

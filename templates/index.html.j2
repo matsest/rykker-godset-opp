@@ -478,12 +478,18 @@
                         <span class="match-venue">{% if m.is_home %}(Hjemme){% else %}(Borte){% endif %}</span>
                     </span>
                     <span class="match-score">{{ m.score }}</span>
-                    <span class="match-result">
-                        {% if m.result == 'W' %}Seier{% elif m.result == 'D' %}Uavgjort{% else %}Tap{% endif %}
+                    <span class="match-meta">
+                        <span class="match-result">
+                            {% if m.result == 'W' %}Seier{% elif m.result == 'D' %}Uavgjort{% else %}Tap{% endif %}
+                        </span>
+                        {% if m.storyline %}
+                        <span class="storyline-pill storyline-{{ m.storyline.key }} tooltip-trigger">{{ m.storyline.label }}<span class="tooltip-text">{{ storyline_legend[m.storyline.key].blurb }}</span></span>
+                        {% endif %}
                     </span>
                 </button>
                 {% endfor %}
             </div>
+            <p class="stats-note">Etikettene (automatisk generert) beskriver kampbildet, ikke bare resultatet, basert på underliggende spill som sjanser, skudd og ballbesittelse.</p>
             <p class="section-link"><a href="https://www.godset.no/resultater" target="_blank" rel="noopener">Se alle resultater på godset.no →</a></p>
         </section>
 
@@ -693,6 +699,9 @@
                         {% if m.result == 'W' %}Seier{% elif m.result == 'D' %}Uavgjort{% else %}Tap{% endif %}
                     </span>
                 </div>
+                {% if m.storyline %}
+                <p class="match-modal-storyline"><span class="storyline-pill storyline-{{ m.storyline.key }}">{{ m.storyline.label }}</span> {{ storyline_legend[m.storyline.key].blurb }}</p>
+                {% endif %}
 
                 {% if m.home_score is not none and m.away_score is not none %}
                 <div class="match-modal-scoreboard result-{{ m.result|lower }}">

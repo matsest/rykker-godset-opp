@@ -29,8 +29,9 @@ Prosjektet bruker en `Makefile` for alle vanlige oppgaver:
 |----------|-------------|
 | `make fetch` | Henter nyeste data fra NIFS API |
 | `make stats` | Beregner statistikker fra rådata |
+| `make stats-jev` | Som `stats`, pluss Jev-kampetiketter på siste runde (caches per kamp, krever `TYPESAFE_API_KEY`) |
 | `make build` | Bygger statisk nettside |
-| `make all` | Kjører hele pipelinen: fetch → stats → build |
+| `make all` | Kjører hele pipelinen: fetch → stats-jev → build |
 | `make serve` | Starter lokal server på [http://localhost:8000](http://localhost:8000) |
 | `make clean` | Sletter genererte filer |
 | `make ci` | Full pipeline med verifisering (brukes av GitHub Actions) |
