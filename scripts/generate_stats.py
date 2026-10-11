@@ -522,18 +522,30 @@ def calculate_goal_timing(match_stats: dict) -> dict:
     }
 
 
-def calculate_top_scorers(match_stats: dict) -> list[dict]:
-    """Aggregate team goalscorers and assists across all matches and return sorted list by goal points."""
+def calculate_top_scorers(match_stats: dict, matches_data: list, window: int = 5) -> list[dict]:
+    """Aggregate team goalscorers and assists across all matches and return sorted list by goal points.
+
+    match_stats is expected to be pre-filtered to the viewed round. In addition to
+    season totals, every player gets goals/assists over the team's last `window`
+    completed matches. Own goals are listed with the scoring player's own club and
+    own_goal=True, so they are never credited as team goals.
+    """
+    recent_ids = recent_match_ids(matches_data, window)
+    recent_index = {mid: i for i, mid in enumerate(recent_ids)}
+
     scorers: dict[str, dict] = {}
     for match_id, data in match_stats.items():
+        slot = recent_index.get(match_id)
         for g in data.get("goalscorers", []):
             name = g.get("name")
             team = g.get("team")
-            if not name or team != TEAM_NAME:
+            if not name or team != TEAM_NAME or g.get("own_goal"):
                 continue
             if name not in scorers:
-                scorers[name] = {"name": name, "goals": 0, "assists": 0}
+                scorers[name] = new_scorer_row(name, len(recent_ids))
             scorers[name]["goals"] += 1
+            if slot is not None:
+                scorers[name]["recent"][slot][0] += 1
 
         for a in data.get("assists", []):
             name = a.get("name")
@@ -541,14 +553,51 @@ def calculate_top_scorers(match_stats: dict) -> list[dict]:
             if not name or team != TEAM_NAME:
                 continue
             if name not in scorers:
-                scorers[name] = {"name": name, "goals": 0, "assists": 0}
+                scorers[name] = new_scorer_row(name, len(recent_ids))
             scorers[name]["assists"] += 1
+            if slot is not None:
+                scorers[name]["recent"][slot][1] += 1
 
     for s in scorers.values():
         s["points"] = s["goals"] + s["assists"]
+        s["recent_form"] = [
+            {"goals": g, "assists": a} for g, a in s.pop("recent")
+        ]
+        s["recent_goals"] = sum(m["goals"] for m in s["recent_form"])
+        s["recent_assists"] = sum(m["assists"] for m in s["recent_form"])
+        s["recent_points"] = s["recent_goals"] + s["recent_assists"]
+        s["recent_matches"] = len(recent_ids)
 
-    sorted_scorers = sorted(scorers.values(), key=lambda x: (x["points"], x["goals"]), reverse=True)
+    sorted_scorers = sorted(
+        scorers.values(), key=lambda x: (x["points"], x["goals"]), reverse=True
+    )
     return sorted_scorers
+
+
+def new_scorer_row(name: str, slots: int) -> dict:
+    return {
+        "name": name,
+        "goals": 0,
+        "assists": 0,
+        # One [goals, assists] pair per match in the recent window.
+        "recent": [[0, 0] for _ in range(slots)],
+    }
+
+
+def recent_match_ids(matches_data: list, window: int) -> list[str]:
+    """Return the ids of the team's last `window` completed matches, oldest first."""
+    played: list[tuple[str, str]] = []
+    for m in matches_data:
+        if m.get("homeTeam", {}).get("name") != TEAM_NAME and \
+           m.get("awayTeam", {}).get("name") != TEAM_NAME:
+            continue
+        result = m.get("result", {}) or {}
+        if result.get("homeScore90") is None or result.get("awayScore90") is None:
+            continue
+        played.append((m.get("timestamp", ""), str(m.get("id"))))
+
+    played.sort()
+    return [match_id for _, match_id in played[-window:]]
 
 
 def calculate_rankings(team_stats: list[dict]) -> dict[str, list[tuple]]:
@@ -1440,7 +1489,7 @@ def main(target_round: int | None = None, with_jev: bool = False):
         format_value=lambda v: f"{'+' if v > 0 else ''}{v}",
     )
 
-    top_scorers = calculate_top_scorers(match_stats)
+    top_scorers = calculate_top_scorers(match_stats, matches_data)
     goal_timing = calculate_goal_timing(match_stats)
 
     stats = {

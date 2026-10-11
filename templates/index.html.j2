@@ -530,6 +530,15 @@
         {% if top_scorers %}
         <section class="section" id="toppscorer">
             <h2 class="section-title"><a href="#toppscorer">Målpoeng</a></h2>
+            <p class="rotate-hint rotate-hint-wide">
+                <svg class="rotate-hint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="7" y="2.5" width="10" height="19" rx="2.5" />
+                    <line x1="10.5" y1="18.5" x2="13.5" y2="18.5" />
+                    <path d="M2.5 12a9.5 9.5 0 0 1 1.6-5.2" />
+                    <polyline points="1.6 5.2, 4.1 6.3, 2.4 8.6" />
+                </svg>
+                Roter telefonen for å se målpoeng siste 5 kamper
+            </p>
             <div class="table-wrapper">
                 <table class="league-table topscorer-table">
                     <thead>
@@ -539,6 +548,7 @@
                             <th class="sortable" data-sort="goals" data-sort-default="desc" aria-label="Sorter etter mål"><span class="hide-mobile">Mål</span><span class="show-mobile">M</span></th>
                             <th class="sortable" data-sort="assists" data-sort-default="desc" aria-label="Sorter etter assists"><span class="hide-mobile">Assists</span><span class="show-mobile">A</span></th>
                             <th class="sortable active-sort desc" data-sort="points" data-sort-default="desc" aria-label="Sorter etter målpoeng"><span class="hide-mobile">Målpoeng</span><span class="show-mobile">MP</span></th>
+                            <th class="hide-compact" title="Mål og assists i de siste fem kampene"><span class="hide-mobile">Siste 5</span><span class="show-mobile">S5</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -549,6 +559,21 @@
                             <td>{{ s.goals }}</td>
                             <td>{{ s.assists }}</td>
                             <td class="points">{{ s.points }}</td>
+                            <td class="recent hide-compact">
+                                <span class="recent-strip" title="Siste {{ s.recent_matches }} kamper: {{ s.recent_goals }} mål, {{ s.recent_assists }} assists" aria-label="Siste {{ s.recent_matches }} kamper: {{ s.recent_goals }} mål, {{ s.recent_assists }} assists">
+                                    {% for m in s.recent_form %}
+                                    {% if m.goals and m.assists %}
+                                    <span class="recent-chip chip-split" title="{{ m.goals }} mål, {{ m.assists }} assists"><span class="chip-goal">{{ m.goals }}</span><span class="chip-assist">{{ m.assists }}</span></span>
+                                    {% elif m.goals %}
+                                    <span class="recent-chip chip-goal" title="{{ m.goals }} mål">{{ m.goals }}</span>
+                                    {% elif m.assists %}
+                                    <span class="recent-chip chip-assist" title="{{ m.assists }} assist">{{ m.assists }}</span>
+                                    {% else %}
+                                    <span class="recent-chip chip-none" title="Ingen målpoeng">0</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -217,6 +217,46 @@ def validate_stats():
         if not isinstance(val, list):
             error(f"'{key}' is not a list")
 
+    # top_scorers structure (incl. last-5 window counts)
+    top_scorers = stats.get("top_scorers")
+    if isinstance(top_scorers, list):
+        for i, s in enumerate(top_scorers):
+            if not isinstance(s, dict):
+                error(f"top_scorers row {i} is not a dict")
+                continue
+            int_keys = ["goals", "assists", "points",
+                        "recent_goals", "recent_assists", "recent_points",
+                        "recent_matches"]
+            for sub in ["name"] + int_keys:
+                if sub not in s:
+                    error(f"top_scorers row {i} missing key: '{sub}'")
+                    continue
+                if sub != "name" and not isinstance(s[sub], int):
+                    error(f"top_scorers row {i} '{sub}' is not an int: {s[sub]!r}")
+            if "recent_form" not in s:
+                error(f"top_scorers row {i} missing key: 'recent_form'")
+            if all(isinstance(s.get(k), int) for k in
+                   ("goals", "assists", "recent_goals", "recent_assists")):
+                if s["points"] != s["goals"] + s["assists"]:
+                    error(f"top_scorers row {i} points != goals + assists")
+                if s["recent_points"] != s["recent_goals"] + s["recent_assists"]:
+                    error(f"top_scorers row {i} recent_points != recent sum")
+                if s["recent_goals"] > s["goals"] or s["recent_assists"] > s["assists"]:
+                    error(f"top_scorers row {i} recent totals exceed season totals")
+
+            # recent_form holds one {goals, assists} entry per windowed match
+            form = s.get("recent_form")
+            if not isinstance(form, list):
+                error(f"top_scorers row {i} recent_form is not a list")
+            elif len(form) != s.get("recent_matches"):
+                error(f"top_scorers row {i} recent_form length != recent_matches")
+            elif all(isinstance(m, dict) for m in form):
+                if (sum(m.get("goals", -1) for m in form) != s.get("recent_goals")
+                        or sum(m.get("assists", -1) for m in form) != s.get("recent_assists")):
+                    error(f"top_scorers row {i} recent_form does not sum to recent totals")
+    else:
+        error("'top_scorers' is not a list")
+
     # Fixture Difficulty Rating on upcoming matches
     upcoming = stats.get("upcoming_matches")
     if isinstance(upcoming, list):

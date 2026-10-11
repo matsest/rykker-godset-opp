@@ -1762,9 +1762,98 @@ button.match-row.match-btn:focus-visible {
     display: none;
 }
 
+/* Recent-form strip: one chip per match, goals green, assists navy */
+.league-table td.recent {
+    white-space: nowrap;
+}
+
+.recent-strip {
+    display: inline-flex;
+    gap: 0.1875rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.recent-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.375rem;
+    height: 1.5rem;
+    padding: 0 0.1875rem;
+    border-radius: 0.1875rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.recent-chip.chip-goal {
+    background: var(--win);
+    color: var(--white);
+}
+
+.recent-chip.chip-assist {
+    background: var(--godset-blue);
+    color: var(--white);
+}
+
+.recent-chip.chip-none {
+    background: var(--gray-200);
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+/* Goals over assists, stacked so the chip keeps the same width as a single chip. */
+.recent-chip.chip-split {
+    flex-direction: column;
+    gap: 1px;
+    width: 1.375rem;
+    min-width: 1.375rem;
+    height: 1.5rem;
+    padding: 0;
+    overflow: hidden;
+}
+
+.recent-chip.chip-split .chip-goal,
+.recent-chip.chip-split .chip-assist {
+    flex: 1;
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    border-radius: 0;
+    font-size: 0.625rem;
+    line-height: 1;
+}
+
+.recent-chip.chip-split .chip-goal {
+    background: var(--win);
+    color: var(--white);
+}
+
+.recent-chip.chip-split .chip-assist {
+    background: var(--godset-blue);
+    color: var(--white);
+}
+
 @media (max-width: 480px) {
     .show-mobile {
         display: inline;
+    }
+}
+
+/* Columns dropped on narrow screens to keep the table readable. */
+@media (max-width: 640px) {
+    .hide-compact {
+        display: none;
+    }
+
+    /* Siste 5 drops at 640px, so its rotate hint appears there rather than
+       at the 480px breakpoint used by the standings table. */
+    .rotate-hint-wide {
+        display: flex;
     }
 }
 
