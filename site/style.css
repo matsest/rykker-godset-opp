@@ -450,6 +450,33 @@ body {
     font-style: italic;
 }
 
+/* Rotate-to-landscape hint, shown only where the table drops columns.
+   Sits between the section heading and the table. */
+.rotate-hint {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.rotate-hint-icon {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .rank-indicator {
     font-size: 0.9rem;
     font-weight: 700;
@@ -1684,6 +1711,11 @@ button.match-row.match-btn:focus-visible {
 
     .hide-mobile {
         display: none;
+    }
+
+    /* Shown only where +/- , MF and Form are hidden above. */
+    .rotate-hint {
+        display: flex;
     }
 
     .modal-content {
