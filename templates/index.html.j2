@@ -528,6 +528,7 @@
 
         {# Top Scorers #}
         {% if top_scorers %}
+        {% set visible_count = 10 %}
         <section class="section" id="toppscorer">
             <h2 class="section-title"><a href="#toppscorer">Målpoeng</a></h2>
             <p class="rotate-hint rotate-hint-wide">
@@ -540,7 +541,7 @@
                 Roter telefonen for å se målpoeng siste 5 kamper
             </p>
             <div class="table-wrapper">
-                <table class="league-table topscorer-table">
+                <table class="league-table topscorer-table" id="topscorer-body">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -553,7 +554,7 @@
                     </thead>
                     <tbody>
                         {% for s in top_scorers %}
-                        <tr data-goals="{{ s.goals }}" data-assists="{{ s.assists }}" data-points="{{ s.points }}">
+                        <tr{% if loop.index > visible_count %} class="is-collapsed"{% endif %} data-goals="{{ s.goals }}" data-assists="{{ s.assists }}" data-points="{{ s.points }}">
                             <td class="pos">{{ loop.index }}</td>
                             <td class="team">{{ s.name }}</td>
                             <td>{{ s.goals }}</td>
@@ -579,6 +580,14 @@
                     </tbody>
                 </table>
             </div>
+            {% if top_scorers|length > visible_count %}
+            <p class="section-link">
+                <button type="button" class="expand-toggle" data-expand-target="topscorer-body" data-expand-label="Vis alle {{ top_scorers|length }} spillere" aria-expanded="false" aria-controls="topscorer-body">
+                    <span class="expand-label">Vis alle {{ top_scorers|length }} spillere</span>
+                    <svg class="expand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="6 9, 12 15, 18 9" /></svg>
+                </button>
+            </p>
+            {% endif %}
         </section>
         {% endif %}
 
@@ -1087,13 +1096,35 @@
                         return newDir === 'asc' ? aVal - bVal : bVal - aVal;
                     });
 
-                    rows.forEach(function(row, index) {
-                        row.querySelector('td.pos').textContent = index + 1;
+                    // Renumber from the rows currently on screen: while collapsed only the
+                    // first ten count, so the visible ranking stays 1..n.
+                    var expanded = topscorerTable.classList.contains('is-expanded');
+                    var position = 0;
+                    rows.forEach(function(row) {
+                        if (expanded || !row.classList.contains('is-collapsed')) {
+                            position += 1;
+                            row.querySelector('td.pos').textContent = position;
+                        }
                         tbody.appendChild(row);
                     });
                 });
             });
         }
+
+        // Expand/collapse the rows beyond the first ten in the Målpoeng table
+        document.querySelectorAll('.expand-toggle').forEach(function(btn) {
+            var target = document.getElementById(btn.getAttribute('data-expand-target'));
+            if (!target) {
+                return;
+            }
+            btn.addEventListener('click', function() {
+                var expanded = target.classList.toggle('is-expanded');
+                btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                btn.querySelector('.expand-label').textContent = expanded
+                    ? 'Vis topp 10 spillere'
+                    : btn.getAttribute('data-expand-label') || 'Vis alle';
+            });
+        });
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {

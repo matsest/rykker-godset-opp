@@ -1838,6 +1838,55 @@ button.match-row.match-btn:focus-visible {
     color: var(--white);
 }
 
+/* Collapsed rows past the initial ten players in the Målpoeng table */
+.topscorer-table tr.is-collapsed {
+    display: none;
+}
+
+.topscorer-table.is-expanded tr.is-collapsed {
+    display: table-row;
+}
+
+button.expand-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.375rem;
+    background: var(--white);
+    color: var(--godset-blue);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+button.expand-toggle:hover {
+    background: var(--gray-100);
+    border-color: var(--godset-blue);
+}
+
+button.expand-toggle:focus-visible {
+    outline: 2px solid var(--godset-blue);
+    outline-offset: 2px;
+}
+
+.expand-icon {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.15s;
+}
+
+button.expand-toggle[aria-expanded="true"] .expand-icon {
+    transform: rotate(180deg);
+}
+
 @media (max-width: 480px) {
     .show-mobile {
         display: inline;
