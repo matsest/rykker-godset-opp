@@ -940,10 +940,48 @@ def compute_history(table_data: dict, matches_data: list, completed_rounds: list
     return history
 
 
-def build_history_chart(history: list[dict], total_teams: int = 16) -> dict:
+# Two chart geometries: the wide one for desktop, and a narrow, taller one
+# that fits a phone screen without horizontal scrolling. Text and dot sizes
+# are in SVG user units, so the compact variant uses a smaller viewBox and
+# proportionally larger type/dots to stay legible after scaling.
+CHART_LAYOUTS = {
+    "wide": {
+        "width": 620,
+        "height": 240,
+        "pad_left": 30,
+        "pad_right": 12,
+        "pad_top": 12,
+        "pad_bottom": 24,
+        "dot_radius": 5,
+        "tick_font": 10,
+        "label_font": 10,
+        "label_every": 4,
+        "x_label_every": 5,
+    },
+    # Taller relative to width so 16 rows of type stay legible on a phone.
+    "compact": {
+        "width": 320,
+        "height": 320,
+        "pad_left": 30,
+        "pad_right": 10,
+        "pad_top": 10,
+        "pad_bottom": 26,
+        "dot_radius": 4.5,
+        "tick_font": 13,
+        "label_font": 12,
+        "label_every": 4,
+        "x_label_every": 5,
+    },
+}
+
+
+def build_history_chart(history: list[dict], total_teams: int = 16,
+                        layout: str = "wide") -> dict:
     """Precompute SVG coordinates for the season position chart."""
-    width, height = 620, 240
-    pad_left, pad_right, pad_top, pad_bottom = 30, 12, 12, 24
+    spec = CHART_LAYOUTS[layout]
+    width, height = spec["width"], spec["height"]
+    pad_left, pad_right = spec["pad_left"], spec["pad_right"]
+    pad_top, pad_bottom = spec["pad_top"], spec["pad_bottom"]
     rounds = [h["round"] for h in history]
     min_round, max_round = (min(rounds), max(rounds)) if rounds else (1, 1)
     span = max(max_round - min_round, 1)
@@ -959,6 +997,7 @@ def build_history_chart(history: list[dict], total_teams: int = 16) -> dict:
             "round": h["round"],
             "x": x_pos(h["round"]),
             "y": y_pos(h["position"]),
+            "r": spec["dot_radius"],
             "position": h["position"],
             "points": h["points"],
             "result": h.get("result"),
@@ -978,13 +1017,34 @@ def build_history_chart(history: list[dict], total_teams: int = 16) -> dict:
         if position >= 15:
             return "tick-relegation"
         return ""
+    # Zone boundaries always get a number; other positions fill in only where
+    # they clear the previous label by more than a line height, so numbers
+    # never overlap when rows are short.
+    tick_font = spec["tick_font"]
+    min_gap = tick_font * 1.35
+    labelled: set[int] = set()
+    preferred = [p for p in (1, 2, 6, 14, total_teams) if p <= total_teams]
+    optional = [p for p in range(1, total_teams + 1)
+                if p % spec["label_every"] == 0]
+    for p in preferred:
+        if all(abs(y_pos(p) - y_pos(q)) >= min_gap for q in labelled):
+            labelled.add(p)
+    for p in optional:
+        if all(abs(y_pos(p) - y_pos(q)) >= min_gap for q in labelled):
+            labelled.add(p)
     ticks = [
-        {"position": p, "y": y_pos(p), "class": tick_class(p)}
+        {
+            "position": p,
+            "y": y_pos(p),
+            "class": tick_class(p),
+            "label": p in labelled,
+        }
         for p in range(1, total_teams + 1)
     ]
+    x_every = spec["x_label_every"]
     picked_rounds = sorted(
         {min_round, max_round}
-        | {r for r in range(min_round, max_round + 1) if r % 5 == 0}
+        | {r for r in range(min_round, max_round + 1) if r % x_every == 0}
     )
     x_labels = [{"round": r, "x": x_pos(r)} for r in picked_rounds]
     plot_width = width - pad_left - pad_right
@@ -1010,11 +1070,16 @@ def build_history_chart(history: list[dict], total_teams: int = 16) -> dict:
         band(15, 16, "zone-relegation"),
     ]
     return {
+        "layout": layout,
         "width": width,
         "height": height,
         "pad_bottom": pad_bottom,
         "plot_left": pad_left,
         "plot_right": width - pad_right,
+        "tick_label_x": pad_left - 4,
+        "x_label_y": height - pad_bottom + 18,
+        "tick_font": spec["tick_font"],
+        "label_font": spec["label_font"],
         "min_round": min_round,
         "max_round": max_round,
         "position_points": " ".join(f"{d['x']},{d['y']}" for d in dots),
@@ -1045,6 +1110,9 @@ def main(target_round: int | None = None, with_jev: bool = False):
     # Season history is identical on every round page; compute before filtering.
     history = compute_history(table_data, matches_data, completed_rounds)
     history_chart = build_history_chart(history, total_teams=len(table_data.get("teams", [])))
+    history_chart_compact = build_history_chart(
+        history, total_teams=len(table_data.get("teams", [])), layout="compact"
+    )
 
     match_round_by_id = {str(m.get("id")): m.get("round", 0) for m in matches_data}
 
@@ -1398,6 +1466,7 @@ def main(target_round: int | None = None, with_jev: bool = False):
         ),
         "history": history,
         "history_chart": history_chart,
+        "history_chart_compact": history_chart_compact,
         "top_scorers": top_scorers,
         "team": {
             "name": TEAM_NAME,

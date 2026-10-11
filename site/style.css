@@ -1787,15 +1787,30 @@ button.match-row.match-btn:focus-visible {
 
 /* Season development chart */
 .history-chart-wrapper {
-    overflow-x: auto;
     margin-bottom: 1rem;
 }
 
+/* Desktop gets the wide 620x240 chart. On narrow screens the compact
+   variant (narrower viewBox, larger type) is swapped in instead, so the
+   chart fits without horizontal scrolling. */
 .history-chart {
     width: 100%;
-    min-width: 420px;
     height: auto;
     display: block;
+}
+
+.history-chart-compact {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .history-chart-wide {
+        display: none;
+    }
+
+    .history-chart-compact {
+        display: block;
+    }
 }
 
 .history-grid {
@@ -1819,8 +1834,9 @@ button.match-row.match-btn:focus-visible {
     fill: rgba(220, 53, 69, 0.10);
 }
 
+/* font-size comes from the chart layout spec, not CSS, so the wide and
+   compact variants can scale their type independently. */
 .history-tick {
-    font-size: 10px;
     fill: var(--gray-600);
 }
 
@@ -1852,11 +1868,18 @@ button.match-row.match-btn:focus-visible {
     stroke-linecap: round;
 }
 
+/* Invisible, generously sized hit area so each round is easy to tap on
+   touch screens without changing the visual dot size. */
+.history-dot-hit {
+    fill: transparent;
+}
+
 .history-dot {
     fill: var(--godset-blue);
     stroke: #fff;
     stroke-width: 1.5;
     cursor: pointer;
+    pointer-events: none;
 }
 
 .history-dot.form-w {
@@ -1877,7 +1900,6 @@ button.match-row.match-btn:focus-visible {
 }
 
 .history-round-label {
-    font-size: 10px;
     fill: var(--gray-600);
 }
 

@@ -204,25 +204,32 @@
             <p class="section-intro">Plassering etter hver runde denne sesongen. Trykk på en runde i grafen eller velg runde øverst for å se tallene slik de så ut da.</p>
             {% if history_chart and history_chart.dots %}
             <div class="history-chart-wrapper">
-                <svg class="history-chart" viewBox="0 0 {{ history_chart.width }} {{ history_chart.height }}" role="img" aria-label="Plassering per runde">
-                    {% for zone in history_chart.zones %}
+                {% for variant, chart in [('wide', history_chart), ('compact', history_chart_compact)] %}
+                {% if chart and chart.dots %}
+                <svg class="history-chart history-chart-{{ variant }}" viewBox="0 0 {{ chart.width }} {{ chart.height }}" role="img" aria-label="Plassering per runde">
+                    {% for zone in chart.zones %}
                     <rect x="{{ zone.x }}" y="{{ zone.y }}" width="{{ zone.width }}" height="{{ zone.height }}" class="{{ zone.class }}" />
                     {% endfor %}
-                    {% for tick in history_chart.ticks %}
-                    <line x1="{{ history_chart.plot_left }}" y1="{{ tick.y }}" x2="{{ history_chart.plot_right }}" y2="{{ tick.y }}" class="history-grid" />
-                    <text x="26" y="{{ tick.y + 4 }}" text-anchor="end" class="history-tick {{ tick.class }}">{{ tick.position }}.</text>
+                    {% for tick in chart.ticks %}
+                    <line x1="{{ chart.plot_left }}" y1="{{ tick.y }}" x2="{{ chart.plot_right }}" y2="{{ tick.y }}" class="history-grid" />
+                    {% if tick.label %}
+                    <text x="{{ chart.tick_label_x }}" y="{{ tick.y + chart.tick_font * 0.35 }}" text-anchor="end" font-size="{{ chart.tick_font }}" class="history-tick {{ tick.class }}">{{ tick.position }}.</text>
+                    {% endif %}
                     {% endfor %}
-                    <polyline points="{{ history_chart.position_points }}" class="history-line" />
-                    {% for dot in history_chart.dots %}
+                    <polyline points="{{ chart.position_points }}" class="history-line" />
+                    {% for dot in chart.dots %}
                     <a href="{% if dot.round == season.latest_round %}index.html{% else %}{{ dot.round }}.html{% endif %}">
-                        <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="5" class="history-dot{% if dot.round == season.viewed_round %} history-dot-current{% endif %} form-{{ (dot.result or '')|lower }}" />
+                        <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="{{ dot.r + 7 }}" class="history-dot-hit" />
+                        <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="{{ dot.r }}" class="history-dot{% if dot.round == season.viewed_round %} history-dot-current{% endif %} form-{{ (dot.result or '')|lower }}" />
                         <title>Runde {{ dot.round }}: {{ dot.position }}. plass, {{ dot.points }} poeng</title>
                     </a>
                     {% endfor %}
-                    {% for label in history_chart.x_labels %}
-                    <text x="{{ label.x }}" y="{{ history_chart.height - 8 }}" text-anchor="middle" class="history-round-label">{{ label.round }}</text>
+                    {% for label in chart.x_labels %}
+                    <text x="{{ label.x }}" y="{{ chart.x_label_y }}" text-anchor="middle" font-size="{{ chart.label_font }}" class="history-round-label">{{ label.round }}</text>
                     {% endfor %}
                 </svg>
+                {% endif %}
+                {% endfor %}
             </div>
             {% endif %}
             <details class="history-details">

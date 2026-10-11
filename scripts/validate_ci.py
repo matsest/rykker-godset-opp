@@ -247,7 +247,8 @@ def validate_round_files():
         return
     required_top = ["generated_at", "season", "top_scorers", "team", "last_matches",
                     "upcoming_matches", "table", "team_stats",
-                    "canonical_url", "history", "history_chart"]
+                    "canonical_url", "history", "history_chart",
+                    "history_chart_compact"]
     for path in files:
         label = os.path.basename(path)
         num = _re.search(r"stats_round_(\d+)\.json$", label)
