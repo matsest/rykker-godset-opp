@@ -5,7 +5,7 @@
 Requires [mise](https://mise.jdx.dev/) and [uv](https://docs.astral.sh/uv/):
 
 ```bash
-mise install   # installs Python 3.12 + uv, creates .venv
+mise install   # installs Python 3.14 + uv, creates .venv
 uv sync        # installs dependencies (jinja2)
 ```
 
