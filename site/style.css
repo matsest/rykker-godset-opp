@@ -106,8 +106,12 @@ body {
     padding-top: env(safe-area-inset-top);
 }
 
+/* The menu is centred across the full nav bar rather than the 800px
+   content column: at 0.85rem the ten links need ~890px, so capping the
+   bar at 800px left no slack for justify-content and pushed the last
+   links past the right edge. */
 .nav-inner {
-    max-width: 800px;
+    max-width: none;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -211,6 +215,23 @@ body {
 
     .nav-menu a:last-child {
         border-bottom: none;
+    }
+}
+
+/* Tighten link padding only in the band above the mobile breakpoint,
+   where the full-width bar is still narrower than the menu. */
+@media (max-width: 1000px) and (min-width: 641px) {
+    .nav-menu a {
+        padding-left: 0.45rem;
+        padding-right: 0.45rem;
+    }
+}
+
+@media (max-width: 880px) and (min-width: 641px) {
+    .nav-menu a {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+        font-size: 0.8rem;
     }
 }
 
