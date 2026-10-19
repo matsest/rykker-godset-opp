@@ -225,9 +225,10 @@ wheels = [
 
 [[package]]
 name = "typesafe-sdk"
-version = "0.7.3"
+version = "0.7.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "anyio" },
     { name = "httpx2" },
     { name = "packaging" },
     { name = "pydantic" },
@@ -236,9 +237,9 @@ dependencies = [
     { name = "truststore", marker = "sys_platform != 'emscripten'" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/15/c5/f659e9b60d239d88a5e0c0ae6ecdde478aadb9db9b962cac1075b55df5c1/typesafe_sdk-0.7.3.tar.gz", hash = "sha256:7c3efa360bfe34a0017047ddb89ab254b8e1b45f4c5a16c6533059307f925748", size = 24325, upload-time = "2026-10-09T09:43:58.41Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/26/4d/383aa14f4cfe5fb41023ea1cab52d7f79cc31ab200ee7314317cf89db744/typesafe_sdk-0.7.5.tar.gz", hash = "sha256:1eeeb0dc80a7161d84896db42a5016dc0a7c8872fa16540b70163e5357b6d398", size = 34152, upload-time = "2026-10-14T21:21:42.837Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4c/f2/8c091d0e259fa5e07b25fea1e3baced59e74bd08a4a9965395885a6ffbe3/typesafe_sdk-0.7.3-py3-none-any.whl", hash = "sha256:27449bdcfba4a2580a669637e925541e7ba491671d5a52509220546b41c9ea3d", size = 37633, upload-time = "2026-10-09T09:43:57.155Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/f6/bee4c3b49570c2d312057c9e37c1446cf37eb1b86bf5872f7a797e803326/typesafe_sdk-0.7.5-py3-none-any.whl", hash = "sha256:967a8b61494d536abb55ee3f3a2b10e81685cb6baad6ccdcab588bdc6c9b86d2", size = 49948, upload-time = "2026-10-14T21:21:41.337Z" },
 ]
 
 [[package]]
