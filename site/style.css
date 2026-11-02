@@ -248,6 +248,48 @@ body {
     font-weight: 400;
 }
 
+/* Promotion secured banner */
+.promotion-secured {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, #0b5d2e 0%, #1f8a3b 55%, #28a745 100%);
+    color: var(--white);
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.promotion-secured-kicker {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.promotion-secured-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+@media (min-width: 640px) {
+    .promotion-secured {
+        padding: 2rem 1rem;
+    }
+
+    .promotion-secured-title {
+        font-size: 2rem;
+    }
+}
+
 /* Hero */
 .hero {
     padding: 2rem 0;
@@ -336,6 +378,16 @@ body {
     font-size: 0.875rem;
     color: var(--gray-600);
     margin-top: 0.25rem;
+}
+
+.hero-stat-secured {
+    color: var(--win);
+    font-size: 1.75rem;
+    letter-spacing: -0.01em;
+}
+
+.gauge-secured .gauge-bar {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(40, 167, 69, 0.18);
 }
 
 /* Sections */
@@ -634,6 +686,21 @@ body {
 
 .promo-label {
     font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+.promo-item-secured {
+    background: #e8f5ec;
+}
+
+.promo-item-secured .promo-value {
+    color: var(--win);
+}
+
+.promo-note {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
     color: var(--gray-600);
 }
 

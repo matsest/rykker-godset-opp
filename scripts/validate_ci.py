@@ -126,9 +126,18 @@ def validate_stats():
     # promotion structure
     promo = team.get("promotion")
     if isinstance(promo, dict):
-        for key in ["status", "status_text", "gauge_percent", "spots_direct", "spots_qualification", "points_to_1st", "points_to_2nd", "points_to_6th"]:
+        for key in ["status", "status_text", "gauge_percent", "spots_direct", "spots_qualification", "points_to_1st", "points_to_2nd", "points_to_6th", "secured", "margin", "chaser_name", "chaser_position", "rounds_remaining", "maximum_chaser_points"]:
             if key not in promo:
                 error(f"team.promotion missing key: '{key}'")
+        if promo.get("secured"):
+            spots = promo.get("spots_direct", 2)
+            if isinstance(team.get("position"), int) and team["position"] > spots:
+                error("team.promotion.secured is true but team.position is outside the direct-promotion places")
+            if promo.get("gauge_percent") != 100:
+                warn("team.promotion.secured is true but gauge_percent is not 100")
+            if isinstance(team.get("points"), int) and isinstance(promo.get("maximum_chaser_points"), int):
+                if team["points"] <= promo["maximum_chaser_points"]:
+                    error("team.promotion.secured is true but a chaser can still reach the team's points")
     else:
         error("team.promotion is missing or not a dict")
 

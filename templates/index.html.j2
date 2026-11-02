@@ -1,10 +1,11 @@
+{% set promotion_secured = team.promotion.secured %}
 <!DOCTYPE html>
 <html lang="nb">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% if season.is_historical %}Runde {{ season.viewed_round }} – {% endif %}Rykker Godset Opp? – Følg Strømsgodsets vei tilbake til Eliteserien</title>
-    <meta name="description" content="Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.">
+    <title>{% if season.is_historical %}Runde {{ season.viewed_round }} – {% endif %}{% if promotion_secured %}Opprykket er sikret! – {% endif %}Rykker Godset Opp? – Følg Strømsgodsets vei tilbake til Eliteserien</title>
+    <meta name="description" content="{% if promotion_secured %}Strømsgodset er klar for Eliteserien {{ season.year + 1 }}! Se tabellen, statistikken og veien tilbake.{% else %}Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.{% endif %}">
     <meta name="keywords" content="Strømsgodset, Godset, OBOS-ligaen, opprykk, Eliteserien, tabell, fotball, 2026">
     <meta name="author" content="Mats Estensen">
     <meta name="robots" content="index, follow">
@@ -20,8 +21,8 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ canonical_url }}">
-    <meta property="og:title" content="Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.">
-    <meta property="og:description" content="Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.">
+    <meta property="og:title" content="{% if promotion_secured %}Opprykket er sikret! – Rykker Godset Opp?{% else %}Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.{% endif %}">
+    <meta property="og:description" content="{% if promotion_secured %}Strømsgodset er klar for Eliteserien {{ season.year + 1 }}! Se tabellen, statistikken og veien tilbake.{% else %}Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.{% endif %}">
     <meta property="og:locale" content="nb_NO">
     <meta property="og:image" content="https://godset.mats.codes/og-image.png">
     <meta property="og:image:width" content="1200">
@@ -32,8 +33,8 @@
     <meta name="twitter:site" content="@matsest">
     <meta name="twitter:creator" content="@matsest">
     <meta name="twitter:url" content="{{ canonical_url }}">
-    <meta name="twitter:title" content="Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.">
-    <meta name="twitter:description" content="Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.">
+    <meta name="twitter:title" content="{% if promotion_secured %}Opprykket er sikret! – Rykker Godset Opp?{% else %}Rykker Godset Opp? Følg Strømsgodsets vei tilbake til Eliteserien.{% endif %}">
+    <meta name="twitter:description" content="{% if promotion_secured %}Strømsgodset er klar for Eliteserien {{ season.year + 1 }}! Se tabellen, statistikken og veien tilbake.{% else %}Oppdaterte nøkkeltall, opprykksstatus, ligastatistikk og tabell for Strømsgodset i 2026.{% endif %}">
     <meta name="twitter:image" content="https://godset.mats.codes/og-image.png">
 
     <!-- Structured Data -->
@@ -59,7 +60,7 @@
     <header class="site-header">
         <div class="container">
             <h1 class="site-title">Rykker Godset Opp?</h1>
-            <p class="site-subtitle">Følg Strømsgodsets vei tilbake til Eliteserien i 2026.<br>Automatisk oppdatert med statistikk og tall daglig.</p>
+            <p class="site-subtitle">{% if promotion_secured %}Opprykket er sikret! Strømsgodset er klar for Eliteserien {{ season.year + 1 }}.{% else %}Følg Strømsgodsets vei tilbake til Eliteserien i {{ season.year }}.{% endif %}<br>Automatisk oppdatert med statistikk og tall daglig.</p>
         </div>
     </header>
 
@@ -95,9 +96,16 @@
     </nav>
 
     <main id="main-content" class="container">
+        {% if promotion_secured %}
+        <section class="promotion-secured" aria-labelledby="promotion-secured-title">
+            <p class="promotion-secured-kicker">Opprykket er sikret</p>
+            <h2 class="promotion-secured-title" id="promotion-secured-title">Godset er klar for Eliteserien {{ season.year + 1 }}!</h2>
+        </section>
+        {% endif %}
+
         {# Hero: The Gauge #}
         <section class="hero">
-            <div class="gauge">
+            <div class="gauge{% if promotion_secured %} gauge-secured{% endif %}">
                 <div class="gauge-bar">
                     <div class="gauge-needle" style="left: {{ team.promotion.gauge_percent }}%"></div>
                 </div>
@@ -120,6 +128,12 @@
                     <span class="hero-stat-value">{{ team.played }}</span>
                     <span class="hero-stat-label">Kamper spilt</span>
                 </div>
+                {% if promotion_secured %}
+                <div class="hero-stat">
+                    <span class="hero-stat-value hero-stat-secured">Sikret</span>
+                    <span class="hero-stat-label">Opprykk</span>
+                </div>
+                {% endif %}
             </div>
         </section>
 
@@ -149,17 +163,27 @@
             <div class="promo-grid promo-grid-3">
                 <div class="promo-item {% set diff_1st = -team.promotion.points_to_1st %}{% if diff_1st >= 0 and team.position <= 1 %}promo-positive{% elif diff_1st >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
                     <span class="promo-value">{% set diff_1st = -team.promotion.points_to_1st %}{% if diff_1st > 0 %}+{% endif %}{{ diff_1st|abs }}</span>
-                    <span class="promo-label">Poeng unna 1. plass (opprykk)</span>
+                    <span class="promo-label">{% if promotion_secured %}Poeng unna seriegull{% else %}Poeng unna 1. plass (opprykk){% endif %}</span>
                 </div>
+                {% if promotion_secured %}
+                <div class="promo-item promo-positive promo-item-secured">
+                    <span class="promo-value">Sikret</span>
+                    <span class="promo-label">Direkte opprykk til Eliteserien</span>
+                </div>
+                {% else %}
                 <div class="promo-item {% set diff_2nd = -team.promotion.points_to_2nd %}{% if diff_2nd >= 0 and team.position <= 2 %}promo-positive{% elif diff_2nd >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
                     <span class="promo-value">{% set diff_2nd = -team.promotion.points_to_2nd %}{% if diff_2nd > 0 %}+{% endif %}{{ diff_2nd|abs }}</span>
                     <span class="promo-label">Poeng unna 2. plass (opprykk)</span>
                 </div>
+                {% endif %}
                 <div class="promo-item {% set diff_6th = -team.promotion.points_to_6th %}{% if diff_6th >= 0 and team.position <= 6 %}promo-positive{% elif diff_6th >= -3 %}promo-warning{% else %}promo-negative{% endif %}">
                     <span class="promo-value">{% set diff_6th = -team.promotion.points_to_6th %}{% if diff_6th > 0 %}+{% endif %}{{ diff_6th|abs }}</span>
-                    <span class="promo-label">Poeng unna 6. plass (kvalik)</span>
+                    <span class="promo-label">{% if promotion_secured %}Poeng over kvalikplass{% else %}Poeng unna 6. plass (kvalik){% endif %}</span>
                 </div>
             </div>
+            {% if promotion_secured %}
+            <p class="promo-note">Matematisk sikkert: Det beste laget utenfor opprykksplassene kan maksimalt nå {{ team.promotion.maximum_chaser_points }} poeng, mens Godset står med {{ team.points }}.</p>
+            {% endif %}
         </section>
 
         {# Key Numbers #}

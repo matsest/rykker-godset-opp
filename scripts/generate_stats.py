@@ -62,6 +62,61 @@ def gauge_percent(position: int) -> int:
         return max(5, 30 - (position - 7) * 3)
 
 
+def compute_promotion_security(
+    table_rows: list[dict],
+    matches_data: list[dict],
+    team_row: dict,
+    total_rounds: int,
+) -> dict:
+    """Return how secure the team's direct-promotion spot is.
+
+    A spot is secured when no team outside the direct-promotion places can
+    reach the team's current points with the matches it has left. The check is
+    intentionally conservative: equal points are treated as catchable because
+    tiebreakers are not fully reproducible from matches.json.
+    """
+    remaining_by_team: dict[str, int] = {}
+    for match in matches_data:
+        result = match.get("result", {}) or {}
+        if result.get("homeScore90") is not None:
+            continue
+        for team_name in (match["homeTeam"]["name"], match["awayTeam"]["name"]):
+            remaining_by_team[team_name] = remaining_by_team.get(team_name, 0) + 1
+
+    points = team_row["points"]
+    rounds_remaining = remaining_by_team.get(
+        team_row["name"], max(0, total_rounds - team_row["played"])
+    )
+
+    chasers = [row for row in table_rows if row["place"] > PROMOTION_SPOTS]
+    if not chasers:
+        return {
+            "secured": False,
+            "margin": 0,
+            "chaser_name": "",
+            "chaser_position": None,
+            "rounds_remaining": rounds_remaining,
+            "maximum_chaser_points": points,
+        }
+
+    closest_chaser = min(chasers, key=lambda row: row["place"])
+    chaser_ceilings = [
+        row["points"]
+        + 3 * remaining_by_team.get(row["name"], max(0, total_rounds - row["played"]))
+        for row in chasers
+    ]
+    maximum_chaser_points = max(chaser_ceilings)
+
+    return {
+        "secured": points > maximum_chaser_points,
+        "margin": points - closest_chaser["points"],
+        "chaser_name": closest_chaser["name"],
+        "chaser_position": closest_chaser["place"],
+        "rounds_remaining": rounds_remaining,
+        "maximum_chaser_points": maximum_chaser_points,
+    }
+
+
 def parse_match_result(match: dict, team_name: str) -> str | None:
     """Return 'W', 'D', 'L', or None if match not completed."""
     result = match.get("result", {})
@@ -1218,6 +1273,12 @@ def main(target_round: int | None = None, with_jev: bool = False):
     points_to_2nd = second_place_points - points
     points_to_6th = sixth_place_points - points
 
+    total_rounds = stage_info.get("numberOfRounds", 30)
+    promotion_security = compute_promotion_security(
+        table_rows, matches_data, team_row, total_rounds
+    )
+    gauge = 100 if promotion_security["secured"] else gauge_percent(position)
+
     # Process all Godset matches
     team_matches = []
     for m in matches_data:
@@ -1556,12 +1617,13 @@ def main(target_round: int | None = None, with_jev: bool = False):
             "promotion": {
                 "status": status_key,
                 "status_text": status_text,
-                "gauge_percent": gauge_percent(position),
+                "gauge_percent": gauge,
                 "spots_direct": PROMOTION_SPOTS,
                 "spots_qualification": QUALIFICATION_SPOTS,
                 "points_to_1st": points_to_1st,
                 "points_to_2nd": points_to_2nd,
                 "points_to_6th": points_to_6th,
+                **promotion_security,
             },
             "ranks": team_ranks,
             "form_points_rank": form_points_rank,
@@ -1585,6 +1647,13 @@ def main(target_round: int | None = None, with_jev: bool = False):
 
     print(f"Round {target_round}: stats saved to {round_path}", file=sys.stderr)
     print(f"Godset: {position}. plass, {points} poeng – {status_text}", file=sys.stderr)
+    if promotion_security["secured"]:
+        print(
+            f"  -> direct promotion secured: {promotion_security['margin']} points "
+            f"ahead of {promotion_security['chaser_name']} with "
+            f"{promotion_security['rounds_remaining']} match(es) left",
+            file=sys.stderr,
+        )
 
     # Print rank summary for the latest round only to keep multi-round output readable
     if team_ranks and target_round == latest_round:
