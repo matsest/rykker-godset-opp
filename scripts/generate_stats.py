@@ -889,6 +889,7 @@ def build_form_stat_rank(
     label: str,
     rankings: dict,
     position: int,
+    table_positions: dict[str, int],
     format_value=lambda v: str(v),
 ) -> dict | None:
     """Build rank info for a form-section stat card."""
@@ -913,6 +914,7 @@ def build_form_stat_rank(
                 "name": n,
                 "value": v,
                 "display_value": format_value(v),
+                "position_delta": table_positions[n] - r,
             }
             for n, v, r in rankings.get(field, [])
         ],
@@ -1455,6 +1457,8 @@ def main(target_round: int | None = None, with_jev: bool = False):
         print(f"  -> storyline labels on {len(storylines)}/{len(last_5)} matches", file=sys.stderr)
         storyline_legend = get_legend()
 
+    table_positions = {row["name"]: row["place"] for row in table_rows}
+
     # Build Godset rank info grouped by category
     rank_categories = {
         "offense": {
@@ -1529,6 +1533,7 @@ def main(target_round: int | None = None, with_jev: bool = False):
                             "name": n,
                             "value": v,
                             "display_value": format_stat_value(v, field, meta["format"]),
+                            "position_delta": table_positions[n] - r,
                         }
                         for n, v, r in rankings.get(field, [])
                     ],
@@ -1539,7 +1544,7 @@ def main(target_round: int | None = None, with_jev: bool = False):
         }
 
     form_points_rank = build_form_stat_rank(
-        TEAM_NAME, "points_avg_last_5", "Poeng per kamp", rankings, position,
+        TEAM_NAME, "points_avg_last_5", "Poeng per kamp", rankings, position, table_positions,
     )
     form_goal_difference_rank = build_form_stat_rank(
         TEAM_NAME,
@@ -1547,6 +1552,7 @@ def main(target_round: int | None = None, with_jev: bool = False):
         "Målforskjell",
         rankings,
         position,
+        table_positions,
         format_value=lambda v: f"{'+' if v > 0 else ''}{v}",
     )
 

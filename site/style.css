@@ -1059,6 +1059,10 @@ body {
     color: var(--godset-blue);
 }
 
+.league-table td.rank-delta {
+    font-weight: 700;
+}
+
 .league-table td.table-form-cell {
     padding-left: 0.25rem;
     padding-right: 0.25rem;

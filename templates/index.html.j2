@@ -429,7 +429,7 @@
                 <div class="modal-header">
                     <div class="modal-title-group">
                         <h3 id="modal-title-form-points">{{ team.form_points_rank.label }} – hele ligaen</h3>
-                        <p class="modal-tooltip">Snitt poeng per kamp i de siste 5 kampene – høyere er bedre</p>
+                        <p class="modal-tooltip">Snitt poeng per kamp i de siste 5 kampene – høyere er bedre. ± viser hvor mange plasser laget er høyere (+) eller lavere (−) på statistikken enn i tabellen.</p>
                     </div>
                     <button class="modal-close" type="button" aria-label="Lukk" data-close-modal>&times;</button>
                 </div>
@@ -439,6 +439,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th title="Plasser bedre (+) eller dårligere (−) på statistikken enn i tabellen">±</th>
                                     <th>Lag</th>
                                     <th>{{ team.form_points_rank.label }}</th>
                                 </tr>
@@ -447,6 +448,7 @@
                                 {% for row in team.form_points_rank.full_table %}
                                 <tr class="{% if row.name == 'Strømsgodset' %}highlight{% endif %}">
                                     <td class="pos">{{ row.rank }}</td>
+                                    <td class="rank-delta {% if row.position_delta > 0 %}ind-better{% elif row.position_delta < 0 %}ind-worse{% else %}ind-equal{% endif %}">{% if row.position_delta > 0 %}+{% endif %}{{ row.position_delta }}</td>
                                     <td class="team">{{ row.name }}</td>
                                     <td class="points">{{ row.display_value }}</td>
                                 </tr>
@@ -466,7 +468,7 @@
                 <div class="modal-header">
                     <div class="modal-title-group">
                         <h3 id="modal-title-form-goal-difference">{{ team.form_goal_difference_rank.label }} – hele ligaen</h3>
-                        <p class="modal-tooltip">Mål scoret minus mål sluppet inn i de siste 5 kampene – høyere er bedre</p>
+                        <p class="modal-tooltip">Mål scoret minus mål sluppet inn i de siste 5 kampene – høyere er bedre. ± viser hvor mange plasser laget er høyere (+) eller lavere (−) på statistikken enn i tabellen.</p>
                     </div>
                     <button class="modal-close" type="button" aria-label="Lukk" data-close-modal>&times;</button>
                 </div>
@@ -476,6 +478,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th title="Plasser bedre (+) eller dårligere (−) på statistikken enn i tabellen">±</th>
                                     <th>Lag</th>
                                     <th>{{ team.form_goal_difference_rank.label }}</th>
                                 </tr>
@@ -484,6 +487,7 @@
                                 {% for row in team.form_goal_difference_rank.full_table %}
                                 <tr class="{% if row.name == 'Strømsgodset' %}highlight{% endif %}">
                                     <td class="pos">{{ row.rank }}</td>
+                                    <td class="rank-delta {% if row.position_delta > 0 %}ind-better{% elif row.position_delta < 0 %}ind-worse{% else %}ind-equal{% endif %}">{% if row.position_delta > 0 %}+{% endif %}{{ row.position_delta }}</td>
                                     <td class="team">{{ row.name }}</td>
                                     <td class="points">{{ row.display_value }}</td>
                                 </tr>
@@ -719,9 +723,7 @@
             <div class="modal-header">
                 <div class="modal-title-group">
                     <h3 id="modal-title-{{ category_key }}-{{ key }}">{{ rank.label }} – hele ligaen</h3>
-                    {% if key in ligastats_tooltips %}
-                    <p class="modal-tooltip">{{ ligastats_tooltips[key] }}</p>
-                    {% endif %}
+                    <p class="modal-tooltip">{% if key in ligastats_tooltips %}{{ ligastats_tooltips[key] }}. {% endif %}± viser hvor mange plasser laget er høyere (+) eller lavere (−) på statistikken enn i tabellen.</p>
                 </div>
                 <button class="modal-close" type="button" aria-label="Lukk" data-close-modal>&times;</button>
             </div>
@@ -731,6 +733,7 @@
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th title="Plasser bedre (+) eller dårligere (−) på statistikken enn i tabellen">±</th>
                                 <th>Lag</th>
                                 <th>{{ rank.label }}</th>
                             </tr>
@@ -739,6 +742,7 @@
                             {% for row in rank.full_table %}
                             <tr class="{% if row.name == 'Strømsgodset' %}highlight{% endif %}">
                                 <td class="pos">{{ row.rank }}</td>
+                                <td class="rank-delta {% if row.position_delta > 0 %}ind-better{% elif row.position_delta < 0 %}ind-worse{% else %}ind-equal{% endif %}">{% if row.position_delta > 0 %}+{% endif %}{{ row.position_delta }}</td>
                                 <td class="team">{{ row.name }}</td>
                                 <td class="points">{{ row.display_value }}</td>
                             </tr>
