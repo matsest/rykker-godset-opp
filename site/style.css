@@ -425,6 +425,17 @@ body {
     margin-bottom: 1rem;
 }
 
+.season-done-note {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--godset-blue);
+    background: var(--gray-100, #f5f8fb);
+    border: 1px solid var(--gray-300, #cbd5e1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+
 .section-link {
     margin-top: 1rem;
     text-align: center;

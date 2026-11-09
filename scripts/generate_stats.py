@@ -1270,6 +1270,8 @@ def main(target_round: int | None = None, with_jev: bool = False):
     first_place_points = table_rows[0]["points"] if len(table_rows) > 0 else points
     second_place_points = table_rows[1]["points"] if len(table_rows) > 1 else points
     sixth_place_points = table_rows[5]["points"] if len(table_rows) > 5 else points
+    first_place_name = table_rows[0]["name"] if len(table_rows) > 0 else ""
+    second_place_name = table_rows[1]["name"] if len(table_rows) > 1 else ""
 
     points_to_1st = first_place_points - points
     points_to_2nd = second_place_points - points
@@ -1573,6 +1575,7 @@ def main(target_round: int | None = None, with_jev: bool = False):
             "latest_round": latest_round,
             "available_rounds": completed_rounds,
             "is_historical": target_round != latest_round,
+            "complete": target_round >= total_rounds,
             "round_completed_at": round_completed_at,
         },
         "canonical_url": (
@@ -1629,6 +1632,10 @@ def main(target_round: int | None = None, with_jev: bool = False):
                 "points_to_1st": points_to_1st,
                 "points_to_2nd": points_to_2nd,
                 "points_to_6th": points_to_6th,
+                "first_place_name": first_place_name,
+                "first_place_points": first_place_points,
+                "second_place_name": second_place_name,
+                "second_place_points": second_place_points,
                 **promotion_security,
             },
             "ranks": team_ranks,

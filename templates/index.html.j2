@@ -182,7 +182,13 @@
                 </div>
             </div>
             {% if promotion_secured %}
+            {% if season.complete and team.position == 1 %}
+            <p class="promo-note">Serien er ferdigspilt: Godset tok seriegullet med {{ team.points }} poeng – {{ team.points - team.promotion.second_place_points }} poeng over {{ team.promotion.second_place_name }} (2. plass, {{ team.promotion.second_place_points }} poeng), som også er klar for Eliteserien {{ season.year + 1 }}, og {{ team.promotion.margin }} poeng over {{ team.promotion.chaser_name }} ({{ team.promotion.chaser_position }}. plass), det beste laget utenfor opprykksplassene.</p>
+            {% elif season.complete %}
+            <p class="promo-note">Serien er ferdigspilt: Godset endte på {{ team.points }} poeng – {{ team.promotion.first_place_points - team.points }} poeng bak seriemester {{ team.promotion.first_place_name }} (1. plass, {{ team.promotion.first_place_points }} poeng), som også er klar for Eliteserien {{ season.year + 1 }}, og {{ team.promotion.margin }} poeng foran {{ team.promotion.chaser_name }} ({{ team.promotion.chaser_position }}. plass), det beste laget utenfor opprykksplassene.</p>
+            {% else %}
             <p class="promo-note">Matematisk sikkert: Det beste laget utenfor opprykksplassene kan maksimalt nå {{ team.promotion.maximum_chaser_points }} poeng, mens Godset står med {{ team.points }}.</p>
+            {% endif %}
             {% endif %}
         </section>
 
@@ -531,6 +537,7 @@
         {# Upcoming Matches #}
         <section class="section" id="kommende-kamper">
             <h2 class="section-title"><a href="#kommende-kamper">Kommende kamper</a></h2>
+            {% if upcoming_matches %}
             <div class="matches-list">
                 {% for m in upcoming_matches %}
                 <div class="match-row match-upcoming">
@@ -552,6 +559,10 @@
             </div>
             <p class="stats-note">Vanskelighetsgrad 1 (enklest) til 5 (tøffest). Basert på tabellstyrke (65%) og form siste 5 kamper (35%), justert for hjemme/borte og toppmotstand.</p>
             <p class="section-link"><a href="https://www.godset.no/terminliste" target="_blank" rel="noopener">Se alle kommende kamper på godset.no →</a></p>
+            {% else %}
+            <p class="season-done-note">Serien {{ season.year }} er ferdigspilt – det gjenstår ingen kamper i OBOS-ligaen denne sesongen. Godset spiller i Eliteserien {{ season.year + 1 }}.</p>
+            <p class="section-link"><a href="https://www.godset.no/terminliste" target="_blank" rel="noopener">Terminliste for Eliteserien {{ season.year + 1 }} kommer på godset.no →</a></p>
+            {% endif %}
         </section>
 
         {# Top Scorers #}
